@@ -1,0 +1,628 @@
+/* ══════════════════════════════════════════════════════════════
+   热带屿 · 主题色板（双主题）
+   本文件只做三件事：① 定义星空屿颜色 ② 定义热带海颜色 ③ 右上角切换按钮
+   不改任何布局、类名、结构。
+   ══════════════════════════════════════════════════════════════ */
+
+/* ─────────── ① 星空屿（默认，<html> 无 data-theme 时生效） ───────────
+   下面每个数值都等于改造前页面里写死的原始颜色，一个字符都别改。 */
+:root{
+  /* 天空与底色 */
+  --bg:#07071a;
+  --sky-2:#0d0b26;
+  --sky-3:#140b30;
+  --haze-violet:rgba(76,44,166,.38);
+  --haze-blue:rgba(23,90,168,.32);
+
+  /* 星云 / 星点 / 流星 / 天体 */
+  --neb-violet-strong:rgba(141,74,255,.5);
+  --neb-violet:rgba(141,74,255,.45);
+  --neb-blue-strong:rgba(56,189,248,.4);
+  --neb-blue:rgba(56,189,248,.35);
+  --neb-pink:rgba(240,171,252,.32);
+  --star:#fff;
+  --star-glow:rgba(255,255,255,.45);
+  --shooting:#cfd8ff;
+  --planet-1:#c3a6ff;
+  --planet-2:#3b2a86;
+  --planet-3:#241a5e;
+  --ring-line:rgba(196,181,253,.5);
+
+  /* 文字（视觉升级：紫调白 → 暖灰白 #e0e0e0，其余深浅由同族透明度派生） */
+  --text:#e0e0e0;
+  --text-mid:rgba(224,224,224,.86);
+  --text-dim:rgba(224,224,224,.70);
+  --text-faint:rgba(224,224,224,.55);
+  --text-ghost:rgba(224,224,224,.38);
+  --text-strong:#f2f2f2;
+  --chip-text:rgba(224,224,224,.85);
+  --footer-strong:rgba(224,224,224,.92);
+  --nav-text:rgba(224,224,224,.86);
+  --nav-text-active:#fff;
+  --btn-text:#fff;
+  --toast-text:#fff;
+  --link-on-dark:#a78bfa;
+  --logo-1:#c4b5fd;
+  --logo-2:#8ab6ff;
+  --logo-3:#f0abfc;
+
+  /* 标题渐变与强调色（视觉升级：保持紫调，饱和度适度提高） */
+  --head-grad-1:#c2a4ff;
+  --head-grad-2:#84b0ff;
+  --title-1:#d8ccff;
+  --title-3:#f6b8ff;
+  --accent-lav:#c3a4ff;
+  --accent-blue:#84b0ff;
+  --accent:#7a45ff;
+  --accent-2:#4a6bff;
+  --accent-soft:#a06bff;
+
+  /* 面 / 容器 / 浮层 */
+  --surface-1:rgba(255,255,255,.05);
+  --nav-bg:rgba(18,18,48,.55);
+  --panel:rgba(20,18,50,.72);
+  --panel-solid:#12102e;
+  --input-bg:rgba(10,10,30,.6);
+  --toast-bg:rgba(30,26,66,.92);
+  --overlay:rgba(5,5,20,.72);
+
+  /* 白色透明度族 */
+  --white-04:rgba(255,255,255,.04);
+  --white-08:rgba(255,255,255,.08);
+  --white-12:rgba(255,255,255,.12);
+  --nav-line:rgba(255,255,255,.14);
+  --chip2-line:rgba(255,255,255,.14);
+  --white-16:rgba(255,255,255,.16);
+  --white-18:rgba(255,255,255,.18);
+  --white-20:rgba(255,255,255,.2);
+  --white-25:rgba(255,255,255,.25);
+
+  /* 强调色描边 / 光晕（后缀数字 = 原来的透明度） */
+  --nav-active-bg:rgba(141,74,255,.28);
+  --nav-active-glow:rgba(141,74,255,.35);
+  --violet-12:rgba(141,74,255,.12);
+  --violet-20:rgba(141,74,255,.2);
+  --violet-25:rgba(141,74,255,.25);
+  --violet-35:rgba(141,74,255,.35);
+  --violet-40:rgba(141,74,255,.4);
+  --violet-45:rgba(141,74,255,.45);
+  --violet-50:rgba(141,74,255,.5);
+  --violet-60:rgba(141,74,255,.6);
+  --lav-30:rgba(160,116,255,.3);
+  --lav-35:rgba(160,116,255,.35);
+  --lav-50:rgba(160,116,255,.5);
+  --lav-55:rgba(160,116,255,.55);
+
+  /* 青色 / 阴影 / 品牌光 */
+  --cyan-30:rgba(56,189,248,.3);
+  --cyan-35:rgba(56,189,248,.35);
+  --black-28:rgba(0,0,0,.28);
+  --black-35:rgba(0,0,0,.35);
+  --black-40:rgba(0,0,0,.4);
+  --black-50:rgba(0,0,0,.5);
+  --black-60:rgba(0,0,0,.6);
+  --brand-40:rgba(99,91,255,.4);
+  --brand-45:rgba(99,91,255,.45);
+  --brand-60:rgba(99,91,255,.6);
+  --pu-30:rgba(90,60,220,.3);
+
+  /* 状态色 */
+  --ok:#34d399;
+  --ok-bg:rgba(52,211,153,.1);
+  --ok-line:rgba(52,211,153,.4);
+  --danger-soft:#fca5a5;
+  --danger-45:rgba(248,113,113,.45);
+  --danger-60:rgba(248,113,113,.6);
+
+  /* ── 其余 4 页（作品集 / 学习舱 / 灵感墙 / 成长足迹）补充色 ── */
+  --violet-05:rgba(141,74,255,.05);
+  --violet-10:rgba(141,74,255,.1);
+  --violet-30:rgba(141,74,255,.3);
+  --lav-00:rgba(160,116,255,0);
+  --lav-14:rgba(160,116,255,.14);
+  --lav-40:rgba(160,116,255,.4);
+  --lav-45:rgba(160,116,255,.45);
+  --lav-60:rgba(160,116,255,.6);
+  --lav-80:rgba(160,116,255,.8);
+  --lav-90:rgba(160,116,255,.9);
+  --purple:#c084fc;
+  --purple-12:rgba(186,116,255,.12);
+  --purple-40:rgba(186,116,255,.4);
+  --purple-80:rgba(186,116,255,.8);
+  --purple-90:rgba(186,116,255,.9);
+  --lilac-12:rgba(196,181,253,.12);
+  --lilac-20:rgba(196,181,253,.2);
+  --lilac-40:rgba(196,181,253,.4);
+  --pink-12:rgba(240,171,252,.12);
+  --pink-20:rgba(240,171,252,.2);
+  --pink-42:rgba(240,171,252,.42);
+  --text-lilac:#d6d0ff;
+  --text-muted:#6a6f99;
+  --gold:#ffd166;
+  --gold-10:rgba(255,209,102,.1);
+  --gold-12:rgba(255,209,102,.12);
+  --gold-22:rgba(255,209,102,.22);
+  --gold-38:rgba(255,209,102,.38);
+  --gold-42:rgba(255,209,102,.42);
+  --gold-45:rgba(255,209,102,.45);
+  --gold-80:rgba(255,209,102,.8);
+  --gold-90:rgba(255,209,102,.9);
+  --danger-08:rgba(248,113,113,.08);
+  --danger-12:rgba(248,113,113,.12);
+  --danger-14:rgba(248,113,113,.14);
+  --danger-20:rgba(248,113,113,.2);
+  --danger-30:rgba(248,113,113,.3);
+  --danger-40:rgba(248,113,113,.4);
+  --danger-50:rgba(248,113,113,.5);
+  --ok-12:rgba(52,211,153,.12);
+  --ok-20:rgba(52,211,153,.2);
+  --ok-42:rgba(52,211,153,.42);
+  --ok-90:rgba(52,211,153,.9);
+  --bright:#4fc3ff;
+  --bright-10:rgba(79,195,255,.1);
+  --bright-12:rgba(79,195,255,.12);
+  --bright-22:rgba(79,195,255,.22);
+  --bright-38:rgba(79,195,255,.38);
+  --bright-42:rgba(79,195,255,.42);
+  --bright-45:rgba(79,195,255,.45);
+  --bright-80:rgba(79,195,255,.8);
+  --bright-90:rgba(79,195,255,.9);
+  --ink-111:#111;
+  --panel-deep:#141233;
+  --text-faint-80:rgba(138,143,184,.8);
+  --white-06:rgba(255,255,255,.06);
+  --white-10:rgba(255,255,255,.1);
+  --white-15:rgba(255,255,255,.15);
+  --white-35:rgba(255,255,255,.35);
+  --surface-solid:#fff;
+  --line-solid:#fff;
+
+  /* ── 视觉升级批次（2026-10）：交互 token，供 ⑥ 段落复用 ── */
+  --ease-ui:.25s ease;                              /* 全站统一缓动 */
+  --grain-opacity:.04;                              /* 噪点颗粒层透明度 */
+  --card-bg-hover:rgba(255,255,255,.06);            /* 卡片 hover 底色 */
+  --card-line-hover:rgba(255,255,255,.12);          /* 卡片 hover 描边 */
+  --card-shadow-hover:0 20px 40px rgba(100,120,255,.15); /* 卡片 hover 彩色投影 */
+  --tilt-shadow:rgba(100,120,255,.2);               /* 卡片倾斜时的投影色 */
+}
+
+/* ─────────── ② 热带海（<html data-theme="beach">） ───────────
+   依据《交接文档》10.4 色板；文字深浅由正文色 #0B2A3A 加透明度派生。 */
+html[data-theme="beach"]{
+  /* 天空与底色：天空渐变 FFD79A → FF9E5E → FF6B4A */
+  --bg:#FFD79A;
+  --sky-2:#FF9E5E;
+  --sky-3:#FF6B4A;
+  --haze-violet:rgba(255,232,194,.55);
+  --haze-blue:rgba(0,166,214,.26);
+
+  /* 星云 / 星点 / 流星 / 天体 */
+  --neb-violet-strong:rgba(255,232,194,.42);
+  --neb-violet:rgba(255,232,194,.38);
+  --neb-blue-strong:rgba(72,202,228,.4);
+  --neb-blue:rgba(72,202,228,.34);
+  --neb-pink:rgba(255,107,74,.3);
+  --star:#FFE8C2;
+  --star-glow:rgba(255,232,194,.45);
+  --shooting:#FFE8C2;
+  --planet-1:#FFE8C2;
+  --planet-2:#FF9E5E;
+  --planet-3:#FF6B4A;
+  --ring-line:rgba(255,255,255,.55);
+
+  /* 文字 */
+  --text:#0B2A3A;
+  --text-mid:rgba(11,42,58,.88);
+  --text-dim:rgba(11,42,58,.72);
+  --text-faint:rgba(11,42,58,.6);
+  --text-ghost:rgba(11,42,58,.48);
+  --text-strong:#0B2A3A;
+  --chip-text:rgba(11,42,58,.85);
+  --footer-strong:#FFFFFF;
+  --nav-text:rgba(255,255,255,.88);
+  --nav-text-active:#FFFFFF;
+  --btn-text:#FFFFFF;
+  --toast-text:#FFFFFF;
+  --link-on-dark:#FFE8C2;
+  --logo-1:#FFE8C2;
+  --logo-2:#48CAE4;
+  --logo-3:#FF9E5E;
+
+  /* 标题渐变与强调色 */
+  --head-grad-1:#FF5E3A;
+  --head-grad-2:#00A6D6;
+  --title-1:#FF5E3A;
+  --title-3:#FF9E5E;
+  --accent-lav:#FF5E3A;
+  --accent-blue:#00A6D6;
+  --accent:#FF5E3A;
+  --accent-2:#00A6D6;
+  --accent-soft:#00A6D6;
+
+  /* 面 / 容器 / 浮层 */
+  --surface-1:rgba(255,255,255,.88);
+  --nav-bg:rgba(2,62,138,.86);
+  --panel:rgba(255,255,255,.92);
+  --panel-solid:#FFFFFF;
+  --input-bg:rgba(255,255,255,.9);
+  --toast-bg:rgba(2,62,138,.94);
+  --overlay:rgba(2,62,138,.45);
+
+  /* 白色透明度族 */
+  --white-04:rgba(255,255,255,.45);
+  --white-08:rgba(11,42,58,.08);
+  --white-12:rgba(2,62,138,.14);
+  --nav-line:rgba(255,255,255,.28);
+  --chip2-line:rgba(2,62,138,.16);
+  --white-16:rgba(255,255,255,.8);
+  --white-18:rgba(2,62,138,.18);
+  --white-20:rgba(11,42,58,.22);
+  --white-25:rgba(11,42,58,.35);
+
+  /* 强调色描边 / 光晕 */
+  --nav-active-bg:rgba(255,255,255,.18);
+  --nav-active-glow:rgba(0,166,214,.45);
+  --violet-12:rgba(255,94,58,.1);
+  --violet-20:rgba(255,94,58,.14);
+  --violet-25:rgba(255,94,58,.18);
+  --violet-35:rgba(0,166,214,.3);
+  --violet-40:rgba(255,94,58,.28);
+  --violet-45:rgba(72,202,228,.32);
+  --violet-50:rgba(255,232,194,.45);
+  --violet-60:rgba(255,94,58,.35);
+  --lav-30:rgba(2,62,138,.18);
+  --lav-35:rgba(2,62,138,.2);
+  --lav-50:rgba(255,94,58,.45);
+  --lav-55:rgba(255,94,58,.5);
+
+  /* 青色 / 阴影 / 品牌光 */
+  --cyan-30:rgba(72,202,228,.3);
+  --cyan-35:rgba(72,202,228,.34);
+  --black-28:rgba(2,62,138,.12);
+  --black-35:rgba(2,62,138,.16);
+  --black-40:rgba(2,62,138,.18);
+  --black-50:rgba(2,62,138,.22);
+  --black-60:rgba(2,62,138,.26);
+  --brand-40:rgba(255,94,58,.35);
+  --brand-45:rgba(255,94,58,.38);
+  --brand-60:rgba(255,94,58,.5);
+  --pu-30:rgba(255,94,58,.22);
+
+  /* 状态色 */
+  --ok:#12A07A;
+  --ok-bg:rgba(18,160,122,.1);
+  --ok-line:rgba(18,160,122,.4);
+  --danger-soft:#FF5E3A;
+  --danger-45:rgba(255,94,58,.4);
+  --danger-60:rgba(255,94,58,.55);
+
+  /* ── 其余 4 页补充色（海边版：紫系→主强调橘，亮青/淡紫→次强调青） ── */
+  --violet-05:rgba(255,94,58,.05);
+  --violet-10:rgba(255,94,58,.08);
+  --violet-30:rgba(255,94,58,.22);
+  --lav-00:rgba(255,94,58,0);
+  --lav-14:rgba(255,94,58,.12);
+  --lav-40:rgba(255,94,58,.32);
+  --lav-45:rgba(255,94,58,.36);
+  --lav-60:rgba(255,94,58,.5);
+  --lav-80:rgba(255,94,58,.65);
+  --lav-90:rgba(255,94,58,.75);
+  --purple:#FF5E3A;
+  --purple-12:rgba(255,94,58,.1);
+  --purple-40:rgba(255,94,58,.3);
+  --purple-80:rgba(255,94,58,.6);
+  --purple-90:rgba(255,94,58,.7);
+  --lilac-12:rgba(0,166,214,.1);
+  --lilac-20:rgba(0,166,214,.16);
+  --lilac-40:rgba(0,166,214,.28);
+  --pink-12:rgba(255,158,94,.12);
+  --pink-20:rgba(255,158,94,.2);
+  --pink-42:rgba(255,158,94,.35);
+  --text-lilac:#0B2A3A;
+  --text-muted:rgba(11,42,58,.55);
+  --gold:#FF5E3A;
+  --gold-10:rgba(255,94,58,.1);
+  --gold-12:rgba(255,94,58,.12);
+  --gold-22:rgba(255,94,58,.2);
+  --gold-38:rgba(255,94,58,.32);
+  --gold-42:rgba(255,94,58,.36);
+  --gold-45:rgba(255,94,58,.4);
+  --gold-80:rgba(255,94,58,.62);
+  --gold-90:rgba(255,94,58,.72);
+  --danger-08:rgba(255,94,58,.08);
+  --danger-12:rgba(255,94,58,.1);
+  --danger-14:rgba(255,94,58,.12);
+  --danger-20:rgba(255,94,58,.16);
+  --danger-30:rgba(255,94,58,.24);
+  --danger-40:rgba(255,94,58,.32);
+  --danger-50:rgba(255,94,58,.4);
+  --ok-12:rgba(18,160,122,.1);
+  --ok-20:rgba(18,160,122,.16);
+  --ok-42:rgba(18,160,122,.34);
+  --ok-90:rgba(18,160,122,.85);
+  --bright:#00A6D6;
+  --bright-10:rgba(0,166,214,.1);
+  --bright-12:rgba(0,166,214,.12);
+  --bright-22:rgba(0,166,214,.2);
+  --bright-38:rgba(0,166,214,.32);
+  --bright-42:rgba(0,166,214,.36);
+  --bright-45:rgba(0,166,214,.4);
+  --bright-80:rgba(0,166,214,.65);
+  --bright-90:rgba(0,166,214,.75);
+  --ink-111:#023E8A;
+  --panel-deep:#FFFFFF;
+  --text-faint-80:rgba(11,42,58,.55);
+  --white-06:rgba(2,62,138,.06);
+  --white-10:rgba(2,62,138,.1);
+  --white-15:rgba(2,62,138,.15);
+  --white-35:rgba(2,62,138,.35);
+  --surface-solid:#FFFFFF;
+  --line-solid:rgba(2,62,138,.28);
+
+  /* ── 视觉升级批次：热带海版本（同构不同值，浅底改用暖调 / 深海蓝） ── */
+  --ease-ui:.25s ease;
+  --grain-opacity:.05;                                 /* 浅底颗粒略重才看得见 */
+  --card-bg-hover:rgba(255,255,255,.98);               /* 白卡 hover 再亮一档 */
+  --card-line-hover:rgba(2,62,138,.3);                 /* 深海蓝描边，白底上才有边界 */
+  --card-shadow-hover:0 20px 40px rgba(2,62,138,.18);  /* 深海蓝彩色投影 */
+  --tilt-shadow:rgba(2,62,138,.22);                    /* 卡片倾斜时的投影色 */
+}
+
+/* ─────────── ③ 右上角悬浮切换按钮 ───────────
+   宽屏在右上角；窄屏（≤820px）挪到右下角，避免压住撑满的导航条。 */
+.theme-btn{
+  position:fixed; top:16px; right:16px; z-index:70;
+  width:44px; height:44px; padding:0;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%; cursor:pointer; font-family:inherit;
+  font-size:1.15rem; line-height:1;
+  background:var(--nav-bg);
+  border:1px solid var(--white-18);
+  color:var(--nav-text);
+  box-shadow:0 8px 24px var(--black-35);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  transition:transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.theme-btn:hover{ transform:translateY(-2px); border-color:var(--accent-soft); }
+.theme-btn:active{ transform:translateY(0) scale(.96); }
+@media (max-width:820px){
+  .theme-btn{ top:auto; bottom:18px; right:14px; width:40px; height:40px; font-size:1.05rem; }
+}
+
+/* ─────────── ④ 换肤过渡：只给 body 的单色底与文字，不做全局 transition ─────────── */
+body{ transition:background-color .4s ease, color .4s ease; }
+
+/* ─────────── ⑤ 热带海风景层 ───────────
+   默认 display:none，星空版完全不渲染；只有 <html data-theme="beach"> 才出现。
+   红线：不加任何 filter:blur；动效只动 transform / opacity；
+        prefers-reduced-motion 时全部静止。 */
+.sea-scene{ display:none; }
+
+html[data-theme="beach"] .sea-scene{
+  display:block;
+  position:absolute; inset:0; z-index:3;
+  overflow:hidden; pointer-events:none;
+}
+
+/* 海面：屏幕下方 36%。上浅下深——浅处放正文，最深处放页脚白字。 */
+html[data-theme="beach"] .beach-sea{
+  position:absolute; left:0; right:0; bottom:0; height:36%;
+  overflow:hidden;
+  background:linear-gradient(180deg,#48CAE4 0%, #0096C7 62%, #023E8A 100%);
+}
+
+/* 水面流纹：两层斜向细纹反向平移，让水面有"流向"，不再是一块死渐变 */
+html[data-theme="beach"] .beach-flow{
+  position:absolute; left:-30%; right:-30%; height:70%;
+  background-image:repeating-linear-gradient(8deg,rgba(255,255,255,.1) 0 2px,rgba(255,255,255,0) 2px 26px);
+  will-change:transform;
+}
+html[data-theme="beach"] .bf-1{ top:6%;  animation:beachflow 26s linear infinite; }
+html[data-theme="beach"] .bf-2{ top:38%; opacity:.6; animation:beachflow 40s linear infinite reverse; }
+@keyframes beachflow{ from{transform:translateX(0);} to{transform:translateX(-52px);} }
+
+/* 海平线：一条暖白细带 + 柔和光晕 */
+html[data-theme="beach"] .beach-horizon{
+  position:absolute; left:0; right:0; bottom:36%; height:2px;
+  background:rgba(255,232,194,.95);
+  box-shadow:0 0 22px 5px rgba(255,232,194,.45);
+}
+
+/* 太阳倒影：海面上一条竖向光柱，跟太阳同步呼吸 */
+html[data-theme="beach"] .beach-glowpath{
+  position:absolute; left:24%; bottom:0; width:120px; height:36%; margin-left:-60px;
+  background:linear-gradient(180deg,rgba(255,232,194,.7),rgba(255,232,194,.16) 55%,rgba(255,232,194,0));
+  animation:beachbreathe 7s ease-in-out infinite;
+}
+
+/* 浪头：两条扇贝形浪线贴着水线横向流动。
+   位移量必须等于图案宽度（44px），否则循环会跳帧。 */
+html[data-theme="beach"] .beach-crest{
+  position:absolute; left:0; right:0;
+  bottom:calc(36% - 18px); height:22px;
+  background-repeat:repeat-x;
+  will-change:transform;
+}
+html[data-theme="beach"] .bc-1{
+  background-image:radial-gradient(circle at 50% 100%,rgba(255,255,255,.42) 0 4px,rgba(255,255,255,.22) 7px,rgba(255,255,255,0) 12px);
+  background-size:44px 22px;
+  animation:beachcrest 16s linear infinite;
+}
+html[data-theme="beach"] .bc-2{
+  background-image:radial-gradient(circle at 50% 100%,rgba(255,232,194,.34) 0 3px,rgba(255,232,194,.16) 6px,rgba(255,232,194,0) 10px);
+  background-size:44px 14px; height:14px; bottom:calc(36% - 11px);
+  animation:beachcrest 10s linear infinite reverse;
+}
+@keyframes beachcrest{
+  from{ transform:translateX(0); }
+  to  { transform:translateX(-44px); }
+}
+
+/* 波光：三条窄亮带，来回平移、互不同步（中间那条反向） */
+html[data-theme="beach"] .beach-wave{
+  position:absolute; display:block; height:2px; border-radius:2px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.85),rgba(255,255,255,0));
+  will-change:transform;
+}
+html[data-theme="beach"] .bw-1{ top:22%; left:4%;  width:34%; animation:beachwave 15s ease-in-out infinite; }
+html[data-theme="beach"] .bw-2{ top:52%; left:54%; width:40%; opacity:.75; animation:beachwave 21s ease-in-out infinite reverse; }
+html[data-theme="beach"] .bw-3{ top:80%; left:18%; width:28%; opacity:.55; animation:beachwave 12s ease-in-out infinite; }
+@keyframes beachwave{ from{transform:translateX(-14%);} to{transform:translateX(14%);} }
+
+/* 太阳：纯径向渐变光球，明暗呼吸（不用图片、不用模糊）
+   位置放在椰影右侧、海平线上方，避开居中的正文 */
+html[data-theme="beach"] .beach-sun{
+  position:absolute; left:24%; bottom:38%; width:150px; height:150px; margin-left:-75px;
+  border-radius:50%;
+  background:radial-gradient(circle,#FFFDF6 0%,#FFF0D2 22%,rgba(255,190,120,.95) 42%,rgba(255,140,80,0) 64%);
+  animation:beachbreathe 7s ease-in-out infinite;
+}
+@keyframes beachbreathe{
+  0%,100%{ opacity:.85; transform:scale(1); }
+  50%    { opacity:1;   transform:scale(1.05); }
+}
+
+/* 云：三层不等速横移的柔边椭圆（渐变自带柔边，不需要 blur） */
+html[data-theme="beach"] .beach-cloud{
+  position:absolute; border-radius:50%;
+  background:radial-gradient(ellipse at 50% 55%,rgba(255,255,255,.95),rgba(255,255,255,.55) 45%,rgba(255,255,255,0) 74%);
+  will-change:transform;
+}
+html[data-theme="beach"] .bcl-1{ top:9%;  left:10%; width:270px; height:84px; animation:beachdrift 48s ease-in-out infinite; }
+html[data-theme="beach"] .bcl-2{ top:19%; left:52%; width:210px; height:66px; opacity:.85; animation:beachdrift 64s ease-in-out infinite reverse; }
+html[data-theme="beach"] .bcl-3{ top:5%;  left:72%; width:160px; height:54px; opacity:.7;  animation:beachdrift 82s ease-in-out infinite; }
+@keyframes beachdrift{ from{transform:translateX(-46px);} to{transform:translateX(46px);} }
+
+/* 椰影：内联 SVG 剪影，底部为轴微幅摆动 */
+html[data-theme="beach"] .beach-palm{
+  position:absolute; left:2%; bottom:35%; width:160px; opacity:.92;
+  transform-origin:50% 100%;
+  animation:beachsway 9s ease-in-out infinite;
+}
+html[data-theme="beach"] .beach-palm svg{ display:block; width:100%; height:auto; }
+@keyframes beachsway{
+  0%,100%{ transform:rotate(-1.4deg); }
+  50%    { transform:rotate(1.4deg); }
+}
+
+/* 首页那颗星球原本贴着屏幕底部，海边主题会被海面淹没，抬到海平线上方 */
+html[data-theme="beach"] .planet-pos{ bottom:40%; }
+
+/* 落在橘色天空上的大标题：原来的橘/青渐变在橘底上会发浑，改深海蓝渐变。
+   注意只能用 background-image，写成 background: 会把 background-clip:text 重置掉，文字会变成色块。 */
+html[data-theme="beach"] .hero h1{
+  background-image:linear-gradient(120deg,#023E8A 8%, #0096C7 52%, #023E8A 92%);
+}
+html[data-theme="beach"] .page-head h1{
+  background-image:linear-gradient(120deg,#023E8A, #0096C7);
+}
+
+/* 海上文字：滚动到最底部时落在深蓝海面上，深色字会糊掉，改浅色 */
+html[data-theme="beach"] footer{ color:rgba(255,255,255,.86); }
+html[data-theme="beach"] footer .stars-line{ color:rgba(255,255,255,.55); }
+html[data-theme="beach"] footer a{ color:#FFE8C2; }
+html[data-theme="beach"] .down{ color:rgba(255,255,255,.85); }
+
+/* 系统开启"减少动态效果"：新增的风景动效全部静止，只留静态画面 */
+@media (prefers-reduced-motion: reduce){
+  html[data-theme="beach"] .beach-sun,
+  html[data-theme="beach"] .beach-cloud,
+  html[data-theme="beach"] .beach-wave,
+  html[data-theme="beach"] .beach-palm,
+  html[data-theme="beach"] .beach-crest,
+  html[data-theme="beach"] .beach-flow,
+  html[data-theme="beach"] .beach-glowpath{ animation:none; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ⑥ 视觉升级（「高级感」批次 · 2026-10）——双主题通用
+   规则体两套主题共用，差异全部走 token：
+     :root                     → 星空屿（深底，冷调）
+     html[data-theme="beach"]  → 热带海（浅底，暖调 / 深海蓝）
+   前缀用 html:root（等价 html、但保留 1 个伪类权重），
+   以便压过各页 <style> 里的同名规则，同时又不会压过页面里带 id 的覆盖。
+   ══════════════════════════════════════════════════════════════ */
+
+/* ① 噪点颗粒层：CSS 内联生成（SVG feTurbulence data URI），无外部图片、无额外请求。
+   层级：背景 .space(0) < 噪点(1) < 内容(2)；pointer-events:none 不拦截任何交互。 */
+html:root body::after{
+  content:"";
+  position:fixed; inset:0;
+  z-index:1;
+  pointer-events:none;
+  opacity:var(--grain-opacity);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+  background-size:180px 180px;
+  background-repeat:repeat;
+}
+@media print{
+  html:root body::after{ display:none; }
+}
+
+/* ② 交互过渡统一：0.25s ease
+   容器卡片单独写明属性名，避免 transition:all 把 backdrop-filter（每帧重算模糊）纳入过渡。 */
+html:root a,
+html:root button,
+html:root input,
+html:root select,
+html:root textarea,
+html:root .chip2,
+html:root .op,
+html:root .btn2,
+html:root .mbtn,
+html:root .day,
+html:root .go,
+html:root .stat,
+html:root .skill,
+html:root .titem,
+html:root .pcard,
+html:root .pd,
+html:root .mv,
+html:root .del,
+html:root .pk-btn,
+html:root .pk-remove,
+html:root .ptask-item{
+  transition:all var(--ease-ui);
+}
+
+html:root :is(.card,.wcard,.icard,.tcard,.pcard,.titem),
+html:root .card::before,
+html:root .fcard{
+  transition:transform var(--ease-ui), opacity var(--ease-ui),
+             background-color var(--ease-ui), border-color var(--ease-ui),
+             box-shadow var(--ease-ui);
+}
+
+/* ③ 卡片 hover 统一：上浮 4px + 白 6% 底 + blur(12px) 毛玻璃 + 白 12% 描边 + 蓝紫彩色投影 */
+html:root :is(.card,.wcard,.icard,.tcard,.pcard,.titem):hover{
+  transform:translateY(-4px);
+  background:var(--card-bg-hover);
+  border:1px solid var(--card-line-hover);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:var(--card-shadow-hover);
+}
+
+/* 虚线卡片（成长足迹·待补项）：只换描边颜色，保留 1.5px dashed 的语义 */
+html:root .fcard:hover{
+  transform:translateY(-4px);
+  background:var(--card-bg-hover);
+  border-color:var(--card-line-hover);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:var(--card-shadow-hover);
+}
+
+/* 小格 / 统计块 / 胶囊：只做 2px 上浮，不加大投影，避免糊成一片 */
+html:root :is(.stat,.day,.ptask-item,.skill):hover{
+  transform:translateY(-2px);
+}
+
+/* 首页卡片原有「鼠标跟随光斑」会与统一底色叠出脏边，hover 时让位 */
+html:root .card:hover::before{ opacity:0; }
+
+/* 系统要求减少动效：新增的过渡与位移关掉，颜色变化保留 */
+@media (prefers-reduced-motion: reduce){
+  html:root :is(.card,.wcard,.icard,.tcard,.fcard,.pcard,.titem,.stat,.day,.ptask-item,.skill){ transition:none; }
+  html:root :is(.card,.wcard,.icard,.tcard,.fcard,.pcard,.titem,.stat,.day,.ptask-item,.skill):hover{ transform:none; }
+}

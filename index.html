@@ -2,6 +2,9 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<!-- 防闪屏：必须最先同步执行，先把主题定下来再渲染 -->
+<script>try{if(localStorage.getItem('isle_theme_v1')==='beach'){document.documentElement.setAttribute('data-theme','beach');}}catch(e){}</script>
+<link rel="stylesheet" href="theme.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>热带屿 · 我的宇宙小岛</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏝️</text></svg>">
@@ -11,7 +14,7 @@
   html { scroll-behavior:smooth; }
   body {
     font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-    background:#07071a; color:#e8eaff; overflow-x:hidden;
+    background:var(--bg); color:var(--text); overflow-x:hidden;
     animation:pagein 1.2s ease both;
   }
   @keyframes pagein { from{opacity:0;} to{opacity:1;} }
@@ -20,27 +23,27 @@
   /* ========== 星空背景 ========== */
   .space { position:fixed; inset:0; z-index:0; overflow:hidden;
     background:
-      radial-gradient(ellipse at 20% 10%, rgba(76,44,166,.38), transparent 55%),
-      radial-gradient(ellipse at 85% 80%, rgba(23,90,168,.32), transparent 55%),
-      linear-gradient(180deg,#07071a 0%, #0d0b26 55%, #140b30 100%);
+      radial-gradient(ellipse at 20% 10%, var(--haze-violet), transparent 55%),
+      radial-gradient(ellipse at 85% 80%, var(--haze-blue), transparent 55%),
+      linear-gradient(180deg,var(--bg) 0%, var(--sky-2) 55%, var(--sky-3) 100%);
   }
-  .star { position:absolute; background:#fff; border-radius:50%;
+  .star { position:absolute; background:var(--star); border-radius:50%;
     animation:twinkle var(--d,3s) ease-in-out infinite; }
-  .star.big { box-shadow:0 0 8px 2px rgba(255,255,255,.45); }
+  .star.big { box-shadow:0 0 8px 2px var(--star-glow); }
   @keyframes twinkle { 0%,100%{opacity:.15; transform:scale(.7);} 50%{opacity:1; transform:scale(1.2);} }
   .nebula { position:absolute; border-radius:50%; filter:blur(90px); }
   .n1 { width:520px; height:520px; top:-140px; left:-140px;
-    background:radial-gradient(circle, rgba(139,92,246,.5), transparent 70%);
+    background:radial-gradient(circle, var(--neb-violet-strong), transparent 70%);
     animation:drift 18s ease-in-out infinite alternate; }
   .n2 { width:480px; height:480px; bottom:-120px; right:-100px;
-    background:radial-gradient(circle, rgba(56,189,248,.4), transparent 70%);
+    background:radial-gradient(circle, var(--neb-blue-strong), transparent 70%);
     animation:drift 24s ease-in-out infinite alternate-reverse; }
   .n3 { width:380px; height:380px; top:32%; left:56%;
-    background:radial-gradient(circle, rgba(240,171,252,.32), transparent 70%);
+    background:radial-gradient(circle, var(--neb-pink), transparent 70%);
     animation:drift 28s ease-in-out infinite alternate; }
   @keyframes drift { from{transform:translate(0,0) scale(1);} to{transform:translate(60px,40px) scale(1.15);} }
   .shooting { position:absolute; height:2px; width:130px; border-radius:2px;
-    background:linear-gradient(90deg, #cfd8ff, transparent);
+    background:linear-gradient(90deg, var(--shooting), transparent);
     opacity:0; animation:shoot var(--sd,7s) linear infinite; animation-delay:var(--sy,0s); }
   @keyframes shoot {
     0%   { opacity:0; transform:translate(0,0) rotate(-32deg); }
@@ -53,62 +56,62 @@
   .nav { position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:60;
     display:flex; align-items:center; flex-wrap:wrap; justify-content:center; gap:2px;
     max-width:94vw; padding:8px 12px; border-radius:999px;
-    background:rgba(18,18,48,.55); border:1px solid rgba(255,255,255,.14);
+    background:var(--nav-bg); border:1px solid var(--nav-line);
     backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-    box-shadow:0 8px 32px rgba(0,0,0,.35); }
+    box-shadow:0 8px 32px var(--black-35); }
   .logo { font-weight:800; font-size:1.02rem; padding:0 12px 0 6px; white-space:nowrap;
-    background:linear-gradient(120deg,#c4b5fd,#8ab6ff,#f0abfc);
+    background:linear-gradient(120deg,var(--logo-1),var(--logo-2),var(--logo-3));
     -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .nav a { font-size:.86rem; color:#c6c9f0; padding:7px 13px; border-radius:999px; transition:.25s; white-space:nowrap; }
-  .nav a:hover, .nav a.active { color:#fff; background:rgba(139,92,246,.28); box-shadow:0 0 14px rgba(139,92,246,.35); }
+  .nav a { font-size:.86rem; color:var(--nav-text); padding:7px 13px; border-radius:999px; transition:.25s; white-space:nowrap; }
+  .nav a:hover, .nav a.active { color:var(--nav-text-active); background:var(--nav-active-bg); box-shadow:0 0 14px var(--nav-active-glow); }
 
   /* ========== 首屏 ========== */
   .hero { position:relative; z-index:2; min-height:100vh; display:flex; flex-direction:column;
     align-items:center; justify-content:center; text-align:center; padding:120px 20px 70px; }
-  .badge { font-size:.72rem; letter-spacing:.35em; color:#9aa0c3; padding:7px 16px 7px 22px;
-    border:1px solid rgba(255,255,255,.16); border-radius:999px; margin-bottom:26px;
-    background:rgba(255,255,255,.04); }
+  .badge { font-size:.72rem; letter-spacing:.35em; color:var(--text-dim); padding:7px 16px 7px 22px;
+    border:1px solid var(--white-16); border-radius:999px; margin-bottom:26px;
+    background:var(--white-04); }
   .hero h1 { font-size:clamp(3.2rem,10vw,6rem); font-weight:900; letter-spacing:.1em;
-    background:linear-gradient(120deg,#d8ccff 10%,#8ab6ff 45%,#f6b8ff 90%);
+    background:linear-gradient(120deg,var(--title-1) 10%,var(--head-grad-2) 45%,var(--title-3) 90%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
-    filter:drop-shadow(0 0 26px rgba(139,92,246,.5)); }
-  .typing { margin-top:22px; font-size:clamp(1rem,2.6vw,1.25rem); color:#c6c9f0; min-height:1.9em; }
-  .caret { display:inline-block; width:2px; height:1.1em; background:#a78bfa;
+    filter:drop-shadow(0 0 26px var(--violet-50)); }
+  .typing { margin-top:22px; font-size:clamp(1rem,2.6vw,1.25rem); color:var(--text-mid); min-height:1.9em; }
+  .caret { display:inline-block; width:2px; height:1.1em; background:var(--accent-soft);
     vertical-align:-0.15em; margin-left:3px; animation:blink 1s step-end infinite; }
   @keyframes blink { 50% { opacity:0; } }
-  .hero .desc { margin-top:16px; color:#9aa0c3; max-width:560px; line-height:2.1; font-size:.95rem; }
+  .hero .desc { margin-top:16px; color:var(--text-dim); max-width:560px; line-height:2.1; font-size:.95rem; }
   .btns { margin-top:34px; display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
   .btn { padding:13px 30px; border-radius:999px; font-size:.95rem; transition:.3s; }
-  .btn.primary { background:linear-gradient(120deg,#7c5cff,#4f7dff); color:#fff;
-    box-shadow:0 8px 26px rgba(99,91,255,.45); }
-  .btn.primary:hover { transform:translateY(-3px); box-shadow:0 14px 34px rgba(99,91,255,.6); }
-  .btn.ghost { border:1px solid rgba(255,255,255,.25); color:#c6c9f0; }
-  .btn.ghost:hover { border-color:#a78bfa; color:#fff; transform:translateY(-3px);
-    box-shadow:0 0 18px rgba(139,92,246,.35); }
+  .btn.primary { background:linear-gradient(120deg,var(--accent),var(--accent-2)); color:var(--btn-text);
+    box-shadow:0 8px 26px var(--brand-45); }
+  .btn.primary:hover { transform:translateY(-3px); box-shadow:0 14px 34px var(--brand-60); }
+  .btn.ghost { border:1px solid var(--white-25); color:var(--text-mid); }
+  .btn.ghost:hover { border-color:var(--accent-soft); color:var(--text-strong); transform:translateY(-3px);
+    box-shadow:0 0 18px var(--violet-35); }
   .chips { margin-top:42px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
-  .chip { font-size:.8rem; color:#b9bdf0; background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.12); padding:8px 16px; border-radius:999px; }
-  .chip b { color:#fff; }
-  .down { position:absolute; bottom:26px; left:50%; color:#8a8fb8; font-size:1.25rem;
+  .chip { font-size:.8rem; color:var(--chip-text); background:var(--surface-1);
+    border:1px solid var(--white-12); padding:8px 16px; border-radius:999px; }
+  .chip b { color:var(--text-strong); }
+  .down { position:absolute; bottom:26px; left:50%; color:var(--text-faint); font-size:1.25rem;
     animation:bob 1.8s ease-in-out infinite; }
   @keyframes bob { 0%,100%{ transform:translate(-50%,0);} 50%{ transform:translate(-50%,8px);} }
 
   /* ========== 宇航员与星球 ========== */
   .astro-pos { position:absolute; left:10%; top:22%; z-index:1; }
   .astro { animation:floaty 6s ease-in-out infinite alternate;
-    filter:drop-shadow(0 0 18px rgba(139,92,246,.35)); }
+    filter:drop-shadow(0 0 18px var(--violet-35)); }
   @keyframes floaty { from{ transform:translateY(-10px) rotate(-3deg);}
                       to{ transform:translateY(12px) rotate(3deg);} }
   .planet-pos { position:absolute; right:7%; bottom:12%; z-index:1; }
   .planet-ani { position:relative; animation:floaty 9s ease-in-out infinite alternate-reverse; }
   .planet { position:relative; width:150px; height:150px; border-radius:50%;
-    background:radial-gradient(circle at 32% 28%, #c3a6ff, #7c5cff 48%, #3b2a86 82%, #241a5e);
-    box-shadow:inset -16px -14px 34px rgba(0,0,0,.5), 0 0 60px rgba(139,92,246,.4); }
+    background:radial-gradient(circle at 32% 28%, var(--planet-1), var(--accent) 48%, var(--planet-2) 82%, var(--planet-3));
+    box-shadow:inset -16px -14px 34px var(--black-50), 0 0 60px var(--violet-40); }
   .palm { position:absolute; top:-20px; left:24px; font-size:34px; transform:rotate(-8deg);
-    filter:drop-shadow(0 2px 6px rgba(0,0,0,.4)); }
+    filter:drop-shadow(0 2px 6px var(--black-40)); }
   .ring { position:absolute; left:50%; top:52%; width:230px; height:64px;
     transform:translate(-50%,-50%) rotate(-16deg);
-    border:2px solid rgba(196,181,253,.5); border-radius:50%; }
+    border:2px solid var(--ring-line); border-radius:50%; }
   @media (max-width:820px) {
     .astro-pos { left:2%; top:11%; transform:scale(.55); transform-origin:top left; }
     .planet-pos { right:0; bottom:5%; transform:scale(.62); transform-origin:bottom right; }
@@ -118,40 +121,49 @@
   .section { position:relative; z-index:2; max-width:1080px; margin:0 auto; padding:70px 20px 30px; }
   .sec-head { text-align:center; margin-bottom:44px; }
   .sec-head h2 { font-size:clamp(1.6rem,4vw,2.2rem); letter-spacing:.06em; }
-  .sec-head h2 span { background:linear-gradient(120deg,#c4b5fd,#8ab6ff);
+  .sec-head h2 span { background:linear-gradient(120deg,var(--head-grad-1),var(--head-grad-2));
     -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .sec-head p { color:#9aa0c3; margin-top:10px; font-size:.92rem; }
+  .sec-head p { color:var(--text-dim); margin-top:10px; font-size:.92rem; }
   .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:22px; }
   .card { position:relative; display:block; padding:30px 26px; border-radius:22px; overflow:hidden;
-    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12);
+    background:var(--surface-1); border:1px solid var(--white-12);
     backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); transition:.35s; }
   .card::before { content:""; position:absolute; inset:0; opacity:0; transition:.35s;
-    background:radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(139,92,246,.2), transparent 60%); }
-  .card:hover { transform:translateY(-8px); border-color:rgba(167,139,250,.55);
-    box-shadow:0 18px 44px rgba(90,60,220,.3); }
+    background:radial-gradient(circle at var(--mx,50%) var(--my,50%), var(--violet-20), transparent 60%); }
+  .card:hover { transform:translateY(-8px); border-color:var(--lav-55);
+    box-shadow:0 18px 44px var(--pu-30); }
   .card:hover::before { opacity:1; }
   .card .ico { font-size:2.1rem; display:inline-block; margin-bottom:16px;
-    filter:drop-shadow(0 0 12px rgba(139,92,246,.6)); }
+    filter:drop-shadow(0 0 12px var(--violet-60)); }
   .card h3 { font-size:1.12rem; margin-bottom:10px; letter-spacing:.04em; }
-  .card p { font-size:.88rem; color:#9aa0c3; line-height:1.9; }
-  .card .go { display:inline-block; margin-top:18px; font-size:.82rem; color:#a78bfa; transition:.3s; }
-  .card:hover .go { color:#fff; }
+  .card p { font-size:.88rem; color:var(--text-dim); line-height:1.9; }
+  .card .go { display:inline-block; margin-top:18px; font-size:.82rem; color:var(--accent-soft); transition:.3s; }
+  .card:hover .go { color:var(--text-strong); }
   .reveal { opacity:0; transform:translateY(30px); transition:opacity .8s ease, transform .8s ease; }
   .reveal.on { opacity:1; transform:none; }
 
   /* ========== 每日语 & 页脚 ========== */
   .quote { position:relative; z-index:2; text-align:center; padding:70px 20px 20px; }
-  .quote .q { font-size:1.05rem; color:#c6c9f0; }
-  .quote .src { margin-top:12px; font-size:.78rem; color:#8a8fb8; letter-spacing:.25em; }
+  .quote .q { font-size:1.05rem; color:var(--text-mid); }
+  .quote .src { margin-top:12px; font-size:.78rem; color:var(--text-faint); letter-spacing:.25em; }
   footer { position:relative; z-index:2; text-align:center; padding:50px 20px 42px;
-    color:#8a8fb8; font-size:.85rem; line-height:2.2; }
-  footer .stars-line { letter-spacing:.6em; color:#5b5f8f; margin-bottom:10px; }
-  footer .idinfo { color:#b9bdf0; }
+    color:var(--text-faint); font-size:.85rem; line-height:2.2; }
+  footer .stars-line { letter-spacing:.6em; color:var(--text-ghost); margin-bottom:10px; }
+  footer .idinfo { color:var(--footer-strong); }
 
   /* ========== 鼠标星尘 ========== */
   .spark { position:fixed; z-index:999; pointer-events:none; animation:spark .9s ease-out forwards; }
   @keyframes spark { 0%{ opacity:1; transform:translate(-50%,-50%) scale(.4);}
                      100%{ opacity:0; transform:translate(-50%,14px) scale(1.25);} }
+
+  /* ========== Three.js 粒子海洋（仅首页） ==========
+     z-index:0 与 .space 同层，靠 DOM 顺序压在其上；内容在 z-index:2，噪声颗粒在 z-index:1。 */
+  #ocean { position:fixed; inset:0; width:100%; height:100%; display:block;
+    z-index:0; pointer-events:none;
+    opacity:1; transition:opacity .45s ease; will-change:opacity; }
+  /* 热带海：粒子海只落在海面（.beach-sea 的 bottom:36% → 上沿 64%），做「阳光碎金」 */
+  html[data-theme="beach"] #ocean { clip-path: inset(64% 0 0 0); }
+  @media (prefers-reduced-motion: reduce){ #ocean { transition:none; } }
 </style>
 </head>
 <body>
@@ -161,7 +173,39 @@
   <div class="nebula n1"></div><div class="nebula n2"></div><div class="nebula n3"></div>
   <div class="shooting" style="top:16%; left:80%; --sd:7s; --sy:2s;"></div>
   <div class="shooting" style="top:7%; left:52%; --sd:9s; --sy:5.5s;"></div>
+
+  <!-- 热带海风景层：默认 display:none，只有海边主题才显示（样式在 theme.css ⑤） -->
+  <div class="sea-scene" aria-hidden="true">
+    <div class="beach-sea">
+      <div class="beach-flow bf-1"></div>
+      <div class="beach-flow bf-2"></div>
+      <span class="beach-wave bw-1"></span>
+      <span class="beach-wave bw-2"></span>
+      <span class="beach-wave bw-3"></span>
+    </div>
+    <div class="beach-glowpath"></div>
+    <div class="beach-horizon"></div>
+    <div class="beach-crest bc-1"></div>
+    <div class="beach-crest bc-2"></div>
+    <div class="beach-sun"></div>
+    <div class="beach-cloud bcl-1"></div>
+    <div class="beach-cloud bcl-2"></div>
+    <div class="beach-cloud bcl-3"></div>
+    <div class="beach-palm">
+      <svg viewBox="0 0 180 240">
+        <path d="M86 238c6-40 10-78 14-110 2-16 4-30 8-44" stroke="#023E8A" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <path d="M108 82c-16-14-38-18-56-12 16-10 38-8 54 6z" fill="#023E8A"/>
+        <path d="M108 82c8-22 26-34 46-32-18 2-34 14-44 32z" fill="#023E8A"/>
+        <path d="M108 82c20-2 42 8 54 26-16-14-38-20-54-16z" fill="#023E8A"/>
+        <path d="M108 82c-16-2-32 10-40 26 10-14 26-22 38-18z" fill="#023E8A"/>
+        <path d="M108 82c6-16 2-32-8-42 8 14 10 28 4 42z" fill="#023E8A"/>
+      </svg>
+    </div>
+  </div>
 </div>
+
+<!-- 粒子海洋画布：固定在背景层（与 .space 同为 z-index:0，DOM 顺序在后 → 盖在天空渐变之上、内容之下） -->
+<canvas id="ocean" aria-hidden="true"></canvas>
 
 <!-- 顶部导航 -->
 <nav class="nav">
@@ -173,6 +217,9 @@
   <a href="tools.html">学习舱</a>
   <a href="growth.html">成长足迹</a>
 </nav>
+
+<!-- 主题切换按钮：宽屏右上角，窄屏右下角（样式在 theme.css） -->
+<button class="theme-btn" id="themeBtn" type="button" aria-label="切到热带海" title="切到热带海">🌊</button>
 
 <!-- 首屏 -->
 <header class="hero">
@@ -354,6 +401,214 @@
     document.body.appendChild(s);
     setTimeout(() => s.remove(), 900);
   });
+</script>
+<script>
+/* ===== 主题切换：星空屿 ⇄ 热带海（存 isle_theme_v1） ===== */
+(function(){
+  var root=document.documentElement, KEY='isle_theme_v1';
+  var btn=document.getElementById('themeBtn');
+  if(!btn) return;
+  function isBeach(){ return root.getAttribute('data-theme')==='beach'; }
+  function paint(){
+    if(isBeach()){ btn.textContent='✨'; btn.title='切回星空屿'; btn.setAttribute('aria-label','切回星空屿'); }
+    else{ btn.textContent='🌊'; btn.title='切到热带海'; btn.setAttribute('aria-label','切到热带海'); }
+  }
+  btn.addEventListener('click',function(){
+    if(isBeach()){
+      root.removeAttribute('data-theme');
+      try{ localStorage.setItem(KEY,'star'); }catch(e){}
+    }else{
+      root.setAttribute('data-theme','beach');
+      try{ localStorage.setItem(KEY,'beach'); }catch(e){}
+    }
+    paint();
+  });
+  paint();
+})();
+</script>
+<script>
+/* ================= 首页粒子海洋（Three.js · CDN 固定版本） =================
+   任何一步失败（CDN 不可用 / 无 WebGL / 初始化异常）都只是让画布隐藏，
+   页面回落到原本的深蓝紫渐变背景，不影响任何功能。 */
+(function(){
+  var CDN=[
+    'https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.min.js',
+    'https://unpkg.com/three@0.157.0/build/three.min.js'
+  ];
+  var canvas=document.getElementById('ocean');
+  if(!canvas) return;
+
+  function give_up(msg){
+    canvas.style.display='none';
+    if(window.console&&console.warn) console.warn('[ocean] 粒子海已跳过：'+msg);
+  }
+  function loadScript(i){
+    if(i>=CDN.length) return give_up('CDN 全部不可用');
+    var s=document.createElement('script');
+    s.src=CDN[i]; s.async=true;
+    s.onload=function(){ if(typeof THREE==='undefined') return loadScript(i+1); boot(); };
+    s.onerror=function(){ loadScript(i+1); };
+    document.head.appendChild(s);
+  }
+  function boot(){
+    try{ init(); }catch(err){ give_up((err&&err.message)||'初始化异常'); }
+  }
+
+  function init(){
+    var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var renderer=new THREE.WebGLRenderer({canvas:canvas,alpha:true,antialias:false,powerPreference:'low-power'});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));   /* 性能红线：像素比封顶 1.5 */
+    renderer.setClearColor(0x000000,0);
+
+    var scene=new THREE.Scene();
+    scene.fog=new THREE.FogExp2(0x07071a,0.032);                         /* 远处融进星空底色 */
+    var camera=new THREE.PerspectiveCamera(58,1,0.1,260);
+    camera.position.set(0,8,18);
+    camera.lookAt(0,0,-2);
+
+    /* ── 粒子网格：76 × 52 = 3952 颗 ── */
+    var COLS=76,ROWS=52,N=COLS*ROWS;
+    var pos=new Float32Array(N*3);
+    var col=new Float32Array(N*3);
+    var bx=new Float32Array(N), bz=new Float32Array(N);
+    var i=0, r, c;
+    for(r=0;r<ROWS;r++){
+      for(c=0;c<COLS;c++){
+        var x=(c/(COLS-1)-0.5)*36;
+        var z=(r/(ROWS-1)-0.5)*28;
+        bx[i]=x; bz[i]=z;
+        pos[i*3]=x; pos[i*3+1]=0; pos[i*3+2]=z-4;
+        i++;
+      }
+    }
+    var geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+    var mat=new THREE.PointsMaterial({
+      size:0.085, vertexColors:true, transparent:true, opacity:0.9,
+      sizeAttenuation:true, depthWrite:false, blending:THREE.AdditiveBlending
+    });
+    scene.add(new THREE.Points(geo,mat));
+
+    /* ── 双主题调色：星空=冷调蓝紫点阵；热带海=海面「阳光碎金」 ── */
+    var PALETTE={
+      star :{deep:'#141c4d',mid:'#3b3f9e',hi:'#6a5cff',fog:0x07071a,opacity:.90},
+      beach:{deep:'#7a4a12',mid:'#e0954a',hi:'#ffe8c2',fog:0x0b4a6f,opacity:.55}
+    };
+    var tint=new THREE.Color(),
+        cDeep=new THREE.Color(), cMid=new THREE.Color(), cHi=new THREE.Color();
+    function isBeach(){ return document.documentElement.getAttribute('data-theme')==='beach'; }
+    function paintTheme(){
+      var p=isBeach()?PALETTE.beach:PALETTE.star;
+      cDeep.set(p.deep); cMid.set(p.mid); cHi.set(p.hi);
+      for(var k=0;k<N;k++){
+        var d=Math.min(1,Math.sqrt(bx[k]*bx[k]+bz[k]*bz[k])/22);   /* 中心亮、边缘暗 */
+        tint.copy(cDeep).lerp(cMid,d*0.8).lerp(cHi,Math.random()*0.35);
+        col[k*3]=tint.r; col[k*3+1]=tint.g; col[k*3+2]=tint.b;
+      }
+      geo.attributes.color.needsUpdate=true;
+      scene.fog.color.setHex(p.fog);
+      mat.opacity=p.opacity;
+    }
+    paintTheme();
+
+    function resize(){
+      var w=window.innerWidth||1, h=window.innerHeight||1;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+      renderer.setSize(w,h,false);
+      camera.aspect=w/h; camera.updateProjectionMatrix();
+      if(!running) renderer.render(scene,camera);      /* 暂停状态下补一帧，避免拉伸 */
+    }
+
+    /* ── 正弦叠加起伏：两组主波 + 一组交叉细浪 ── */
+    function wave(t){
+      for(var k=0;k<N;k++){
+        var px=bx[k], pz=bz[k];
+        pos[k*3+1]=Math.sin(px*0.32+t*0.85)*0.62
+                  +Math.sin(pz*0.41-t*0.62)*0.48
+                  +Math.sin((px+pz)*0.19+t*0.4)*0.26;
+      }
+      geo.attributes.position.needsUpdate=true;
+    }
+
+    /* ── 相机：缓慢平移 + 鼠标视差（阻尼跟随） ── */
+    var mouseX=0,mouseY=0,panX=0,panY=0,t0=performance.now(),raf=0,running=false,faded=false;
+    function draw(){
+      var t=(performance.now()-t0)/1000;
+      panX+=(mouseX-panX)*0.06;
+      panY+=(mouseY-panY)*0.06;
+      camera.position.x=Math.sin(t*0.11)*2.8+panX*1.6;
+      camera.position.y=8+Math.sin(t*0.08)*0.55-panY*0.9;
+      camera.position.z=18+Math.cos(t*0.06)*0.8;
+      camera.lookAt(0,0,-2);
+      wave(t);
+      renderer.render(scene,camera);
+    }
+    function loop(){
+      if(!running) return;
+      draw();
+      raf=requestAnimationFrame(loop);
+    }
+    function start(){
+      if(running||reduce||faded||document.hidden) return;
+      running=true; raf=requestAnimationFrame(loop);
+    }
+    function stop(){ running=false; if(raf) cancelAnimationFrame(raf); raf=0; }
+
+    window.addEventListener('resize',resize,{passive:true});
+
+    /* 首屏全屏，滚进内容区后按滚动距离淡出；完全淡出即停渲染 */
+    function onScroll(){
+      var vh=window.innerHeight||1;
+      var y=window.pageYOffset||document.documentElement.scrollTop||0;
+      var o=1-y/(vh*0.72);
+      o=o<0?0:(o>1?1:o);
+      canvas.style.opacity=o.toFixed(3);
+      var nowFaded=(o<=0.02);
+      if(nowFaded!==faded){ faded=nowFaded; if(faded) stop(); else start(); }
+    }
+    window.addEventListener('scroll',onScroll,{passive:true});
+
+    /* 页面不可见时暂停渲染循环 */
+    document.addEventListener('visibilitychange',function(){
+      if(document.hidden) stop(); else start();
+    });
+    /* 上下文丢失：停掉循环，画布自然消失，页面背景仍在 */
+    canvas.addEventListener('webglcontextlost',function(e){ e.preventDefault(); stop(); },false);
+
+    /* 主题切换：换配色（热带海=水面碎金），暂停状态下补一帧再决定是否续跑 */
+    if(window.MutationObserver){
+      new MutationObserver(function(){
+        paintTheme();
+        if(!running) renderer.render(scene,camera);
+        start();
+      }).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+    }
+
+    resize();
+
+    if(reduce){                                   /* 减少动效：只出静态一帧，不做动画与视差 */
+      wave(1.4);
+      camera.position.set(0,8,18);
+      camera.lookAt(0,0,-2);
+      renderer.render(scene,camera);
+      onScroll();
+      return;
+    }
+
+    window.addEventListener('mousemove',function(e){
+      var w=window.innerWidth||1, h=window.innerHeight||1;
+      mouseX=(e.clientX/w-0.5)*2;
+      mouseY=(e.clientY/h-0.5)*2;
+    },{passive:true});
+
+    start();
+    onScroll();
+  }
+
+  loadScript(0);
+})();
 </script>
 </body>
 </html>
