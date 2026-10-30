@@ -27,5 +27,15 @@ const WORKS_SEED = [
       "课程作业"
     ],
     "date": ""
+  },
+  {
+    "title": "房产crm",
+    "cat": "",
+    "desc": "轻量crm",
+    "link": "https://fangchan-crm.pages.dev/",
+    "tags": [
+      "网站"
+    ],
+    "date": ""
   }
 ];
