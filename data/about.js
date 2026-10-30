@@ -2,7 +2,7 @@ const PROFILE_SEED = {
   "avatar": "🌟",
   "name": "黄赛",
   "sid": "202410811402",
-  "cls": "24级工商管理4班",
+  "cls": "工商管理24-4",
   "major": "工商管理",
   "motto": "未来即是现在",
   "skills": [

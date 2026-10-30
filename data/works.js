@@ -15,7 +15,9 @@ const WORKS_SEED = [
     "cat": "网站",
     "desc": "视频网站",
     "link": "https://www.bilibili.com",
-    "tags": [],
+    "tags": [
+      "方便跳转"
+    ],
     "date": ""
   },
   {
@@ -24,7 +26,8 @@ const WORKS_SEED = [
     "desc": "学业网站",
     "link": "https://passport2.chaoxing.com/login?fid=&newversion=true&refer=https%3A%2F%2Fi.chaoxing.com",
     "tags": [
-      "课程作业"
+      "课程作业",
+      "方便跳转"
     ],
     "date": ""
   },
