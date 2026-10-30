@@ -259,11 +259,12 @@ footer a{color:var(--link-on-dark)}
 <footer>✦ 热带屿 · <a href="index.html">返回首页</a></footer>
 
 <script>
-/* ================= 数据层：文件为基座 + 本机编辑增量 =================
-   data/works.js 每次改动都会产生新的「文件指纹」：
-   ▸ 指纹相同 → 本机快照基于当前文件，保留本机编辑（刷新不变，无闪动）
-   ▸ 指纹不同 / 老版本快照 → 以文件内容为准，仅把本机独有的作品追加回来
-   整个过程在首次渲染前同步完成，不额外联网、不重载页面。 */
+/* ================= 数据层：本机快照秒开 + 源站校验自愈 =================
+   ① 首帧：有本机快照就直接渲染（不联网、不闪动、不重载）；
+   ② 首帧后：fetch 源站 data/works.js（cache:no-store）绕开 10 分钟静态缓存：
+      · 印章相同 → 文件没变，保留本机编辑，什么都不做；
+      · 印章不同 → 以源站内容为准，本机独有的作品追加回来，重渲染并提示一次。
+   以源站副本为唯一仲裁，旧缓存不会把新数据「降级」回旧版本。 */
 const STORE_KEY='isle_works_v1';
 const SEAL_KEY=STORE_KEY+'_seal';
 function sealOf(data){
@@ -272,7 +273,20 @@ function sealOf(data){
   for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0;
   return s.length.toString(36)+'.'+h.toString(36);
 }
-const FILE_SEAL=sealOf(typeof WORKS_SEED!=='undefined'?WORKS_SEED:[]);
+const SEED_URL='data/works.js';
+let liveSeal='';   // 当前渲染数据对应的印章（首帧后由源站校验更新）
+/* 从源站文本里取出 JSON 部分（控制台写出的就是严格 JSON） */
+function parseSeedText(text){
+  try{
+    const s=String(text).replace(/^\uFEFF/,'');
+    const i=s.indexOf('=');
+    if(i<0)return null;
+    const arr=/^\s*=\s*\[/.test(s.slice(i));
+    const a=s.indexOf(arr?'[':'{',i), b=s.lastIndexOf(arr?']':'}');
+    if(a<0||b<=a)return null;
+    return JSON.parse(s.slice(a,b+1));
+  }catch(e){return null;}
+}
 const workKey=w=>String(w&&(w.title||w.desc)||'').trim();
 function readLocal(){
   try{const v=JSON.parse(localStorage.getItem(STORE_KEY));if(Array.isArray(v))return v;}catch(e){}
@@ -296,18 +310,40 @@ function mergeWithFile(seed,local){
   });
   return out;
 }
-let fileSynced=false;
 let WORKS=(function(){
-  const seed=JSON.parse(JSON.stringify(WORKS_SEED));
   const local=readLocal();
-  if(!local){writeLocal(seed,FILE_SEAL);return seed;}
-  if(readSeal()===FILE_SEAL)return local;
-  fileSynced=true;
-  const merged=mergeWithFile(seed,local);
-  writeLocal(merged,FILE_SEAL);
-  return merged;
+  if(local){liveSeal=readSeal();return local;}
+  const seed=JSON.parse(JSON.stringify(WORKS_SEED));
+  liveSeal=sealOf(seed);
+  writeLocal(seed,liveSeal);
+  return seed;
 })();
-function persist(){writeLocal(WORKS,FILE_SEAL);}
+function persist(){writeLocal(WORKS,liveSeal);}
+
+/* ===== 源站校验：绕开静态缓存，部署后刷新即时生效；失败/离线就静默保持现状 ===== */
+function syncFromServer(){
+  if(typeof fetch!=='function')return;
+  let ctrl=null,timer=0;
+  try{if(typeof AbortController==='function'){ctrl=new AbortController();timer=setTimeout(()=>ctrl.abort(),6000);}}catch(e){}
+  const opt={cache:'no-store'};
+  if(ctrl)opt.signal=ctrl.signal;
+  let pr;try{pr=fetch(SEED_URL+'?v='+Date.now(),opt);}catch(e){clearTimeout(timer);return;}
+  pr.then(r=>r.ok?r.text():null).then(t=>{
+    clearTimeout(timer);
+    if(!t)return;
+    const fresh=parseSeedText(t);
+    if(!fresh)return;
+    const s=sealOf(fresh);
+    if(s===liveSeal)return;
+    const merged=mergeWithFile(fresh,WORKS);
+    const same=JSON.stringify(merged)===JSON.stringify(WORKS);
+    liveSeal=s;
+    WORKS=merged;
+    persist();
+    if(!same){render();toast('🔄 已同步文件里的最新内容');}
+  }).catch(()=>{clearTimeout(timer);});
+}
+window.addEventListener('pageshow',e=>{if(e.persisted)syncFromServer();});
 
 const CATS={'网站':'🌐','设计':'🎨','写作':'✍️','视频':'🎬','其他':'✨'};
 let tag='全部', kw='';
@@ -425,7 +461,7 @@ s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
 s.style.setProperty('--d',(Math.random()*4+2)+'s');s.style.animationDelay=Math.random()*5+'s';
 sp.appendChild(s);}
 render();
-if(fileSynced)setTimeout(()=>toast('🔄 已同步文件里的最新内容'),400);
+syncFromServer();
 </script>
 <script>
 /* ===== 3D 翻转卡片：无 hover 设备点按翻面（只加交互，不碰数据渲染） ===== */
