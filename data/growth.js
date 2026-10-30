@@ -9,7 +9,7 @@ const MILESTONES_SEED = [
     "date": "2026-09-05",
     "type": "荣誉",
     "title": "获得比赛特等奖",
-    "desc": "三创赛校赛三等奖"
+    "desc": "三创赛校赛"
   },
   {
     "date": "2025-08-05",
