@@ -175,7 +175,7 @@ footer a{color:var(--link-on-dark)}
     <div class="empty" id="futureEmpty" style="display:none">🗺️ 暂无预定航点——点「＋ 添加里程碑」选一个未来日期试试</div>
   </div>
 
-  <p class="tip">💡 页面编辑保存在当前浏览器，下次打开仍在 · 文件（data/growth.js）更新后刷新自动同步新内容，本机独有的条目会保留 · 「↺ 恢复文件初始内容」= 丢弃本机全部编辑、重新读取文件里的种子数据<br>📱 手机与电脑的浏览器各自独立保存；整体迁移用「学习舱 → 数据备份」导出/导入</p>
+  <p class="tip">💡 正式内容只认 data/growth.js（发布时自动带版本号，所以刷新即最新）· 页面上的 ✎ 编辑只是本机临时预览，刷新就恢复线上内容，正式修改请用「内容控制台 → 一键发布」<br>📱 本机不再保存内容副本，手机与电脑看到的都是线上同一份</p>
 </main>
 
 <div class="modal" id="editModal">
@@ -204,22 +204,22 @@ footer a{color:var(--link-on-dark)}
 <footer>✦ 热带屿 · <a href="index.html">返回首页</a></footer>
 
 <script>
-/* ================= 数据层：本机快照秒开 + 源站校验自愈 =================
-   ① 首帧：有本机快照就直接渲染（不联网、不闪动、不重载）；
-   ② 首帧后：fetch 源站 data/growth.js（cache:no-store）绕开 10 分钟静态缓存：
-      · 印章相同 → 文件没变，保留本机编辑，什么都不做；
-      · 印章不同 → 以源站内容为准，本机独有的条目追加回来，重渲染并提示一次。
-   以源站副本为唯一仲裁，旧缓存不会把新数据「降级」回旧版本。 */
-const STORE_KEY='isle_milestones_v1';
-const SEAL_KEY=STORE_KEY+'_seal';
+/* ================= 数据层：只认线上文件（本机不留正式数据） =================
+   ① 首帧：直接渲染 data/growth.js 的内容 —— 发布时会自动打版本戳 ?v=hash，首帧即最新；
+   ② 首帧后：再 fetch 一次源站副本（cache:no-store）兜底，版本戳没更新也能百毫秒内校正；
+   ③ 页面上的 ✎ 编辑只在本次会话内存生效，刷新即恢复线上内容（正式发布请用内容控制台）。 */
+const seedTag=document.querySelector('script[src^="data/growth.js"]');
+const SEED_URL=seedTag?seedTag.getAttribute('src').split('?')[0]:'data/growth.js';
+const SEED_VER=(function(){
+  try{const m=/[?&]v=([^&"']+)/.exec(seedTag?seedTag.getAttribute('src'):'');return m?m[1]:'';}catch(e){return '';}
+})();
 function sealOf(data){
   const s=JSON.stringify(data);
   let h=5381;
   for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0;
   return s.length.toString(36)+'.'+h.toString(36);
 }
-const SEED_URL='data/growth.js';
-let liveSeal='';   // 当前渲染数据对应的印章（首帧后由源站校验更新）
+let liveSeal=sealOf(typeof MILESTONES_SEED!=='undefined'?MILESTONES_SEED:[]);
 /* 从源站文本里取出 JSON 部分（控制台写出的就是严格 JSON） */
 function parseSeedText(text){
   try{
@@ -233,14 +233,6 @@ function parseSeedText(text){
   }catch(e){return null;}
 }
 const mileKey=m=>String(m&&m.date||'')+'\u0001'+String(m&&m.title||'');
-function readLocal(){
-  try{const v=JSON.parse(localStorage.getItem(STORE_KEY));if(Array.isArray(v))return v;}catch(e){}
-  return null;
-}
-function readSeal(){try{return localStorage.getItem(SEAL_KEY)||'';}catch(e){return '';}}
-function writeLocal(list,seal){
-  try{localStorage.setItem(STORE_KEY,JSON.stringify(list));localStorage.setItem(SEAL_KEY,seal);}catch(e){}
-}
 /* 日期+标题视为同一条（文件优先），避免文件更新后出现重复卡片 */
 function mergeWithFile(seed,local){
   const out=seed.map(m=>Object.assign({},m));
@@ -255,38 +247,41 @@ function mergeWithFile(seed,local){
   });
   return out;
 }
-let MILESTONES=(function(){
-  const local=readLocal();
-  if(local){liveSeal=readSeal();return local;}
-  const seed=JSON.parse(JSON.stringify(MILESTONES_SEED));
-  liveSeal=sealOf(seed);
-  writeLocal(seed,liveSeal);
-  return seed;
+/* 老版本把正式数据存在浏览器里，现在只认线上文件：顺手清掉遗留副本 */
+(function(){
+  try{
+    localStorage.removeItem('isle_milestones_v1');
+    localStorage.removeItem('isle_milestones_v1_seal');
+  }catch(e){}
 })();
-function persist(){writeLocal(MILESTONES,liveSeal);}
+let MILESTONES=JSON.parse(JSON.stringify(MILESTONES_SEED));
+function persist(){/* 不落盘：正式数据只认 data/growth.js */}
 
-/* ===== 源站校验：绕开静态缓存，部署后刷新即时生效；失败/离线就静默保持现状 ===== */
-function syncFromServer(){
+/* ===== 源站校验 / 手动强同步：绕开静态缓存，部署后刷新即时生效 ===== */
+function syncFromServer(force){
   if(typeof fetch!=='function')return;
   let ctrl=null,timer=0;
   try{if(typeof AbortController==='function'){ctrl=new AbortController();timer=setTimeout(()=>ctrl.abort(),6000);}}catch(e){}
   const opt={cache:'no-store'};
   if(ctrl)opt.signal=ctrl.signal;
-  let pr;try{pr=fetch(SEED_URL+'?v='+Date.now(),opt);}catch(e){clearTimeout(timer);return;}
+  let pr;try{pr=fetch(SEED_URL+'?v='+Date.now(),opt);}catch(e){clearTimeout(timer);if(force)toast('⚠️ 拉取失败，请检查网络后重试');return;}
   pr.then(r=>r.ok?r.text():null).then(t=>{
     clearTimeout(timer);
-    if(!t)return;
+    if(!t){if(force)toast('⚠️ 拉取失败，请检查网络后重试');return;}
     const fresh=parseSeedText(t);
-    if(!fresh)return;
+    if(!fresh){if(force)toast('⚠️ 线上数据格式异常，未同步');return;}
     const s=sealOf(fresh);
-    if(s===liveSeal)return;
+    if(s===liveSeal){
+      if(force)toast('✅ 已是最新版本'+(SEED_VER?'（v='+String(SEED_VER).slice(0,8)+'）':''));
+      return;
+    }
     const merged=mergeWithFile(fresh,MILESTONES);
     const same=JSON.stringify(merged)===JSON.stringify(MILESTONES);
     liveSeal=s;
     MILESTONES=merged;
-    persist();
     if(!same){render();toast('🔄 已同步文件里的最新内容');}
-  }).catch(()=>{clearTimeout(timer);});
+    else if(force){toast('✅ 已是最新版本');}
+  }).catch(()=>{clearTimeout(timer);if(force)toast('⚠️ 拉取失败，请检查网络后重试');});
 }
 window.addEventListener('pageshow',e=>{if(e.persisted)syncFromServer();});
 
@@ -323,12 +318,11 @@ function render(){
   MILESTONES.forEach(m=>cnt[m.type]=(cnt[m.type]||0)+1);
   $('chips').innerHTML=`<button class="chip2${filter==='全部'?' on':''}" data-t="全部">全部 ${MILESTONES.length}</button>`
     +Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]).map(t=>`<button class="chip2${t===filter?' on':''}" data-t="${esc(t)}">${T({type:t}).ico} ${esc(t)} ${cnt[t]}</button>`).join('')
-    +`<button class="chip2 resetbtn" id="resetBtn" title="丢弃本机编辑，重新读取文件里的初始内容">↺ 恢复文件初始内容</button>`;
+    +`<button class="chip2 resetbtn" id="resetBtn" title="立即从线上拉取最新内容（绕开所有缓存）">↻ 重新拉取线上最新</button>`;
   document.querySelectorAll('.chip2[data-t]').forEach(b=>b.onclick=()=>{filter=b.dataset.t;render();});
   $('resetBtn').onclick=()=>{
-    if(confirm('将丢弃本页在浏览器中的全部编辑，恢复为文件里写死的初始内容（种子数据）。\n\n若本机编辑里有想保留的里程碑，请先导出备份！\n\n确定恢复吗？')){
-      try{localStorage.removeItem(STORE_KEY);localStorage.removeItem(SEAL_KEY);}catch(e){}
-      location.reload();
+    if(confirm('重新从线上拉取最新内容？\n\n页面上的临时编辑会被线上内容替换（正式数据以 data/growth.js 为准）。')){
+      syncFromServer(true);
     }
   };
 
@@ -451,8 +445,8 @@ $('emSave').onclick=()=>{
   if(!date){toast('请先选择日期');return;}
   if(!title){toast('标题还没写哦');return;}
   const item={date,type:$('efType').value,title,desc:$('efDesc').value.trim()};
-  if(editIdx<0){MILESTONES.push(item);toast('🚀 新航点已写入星图');}
-  else{MILESTONES[editIdx]=item;toast('✅ 已保存修改');}
+  if(editIdx<0){MILESTONES.push(item);toast('🚀 已加入本机预览（刷新恢复线上内容）');}
+  else{MILESTONES[editIdx]=item;toast('✅ 已更新（仅本机预览）');}
   persist();closeModal();render();
 };
 $('emCancel').onclick=closeModal;
@@ -463,7 +457,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 function delMile(i){
   const m=MILESTONES[i];if(!m)return;
   if(confirm('删除里程碑「'+m.title+'」？')){
-    MILESTONES.splice(i,1);persist();render();toast('🗑️ 已删除');
+    MILESTONES.splice(i,1);persist();render();toast('🗑️ 已删除（仅本机预览）');
   }
 }
 

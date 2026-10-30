@@ -462,7 +462,7 @@ async function save(){
     const json = await res.json();
     curSha = json.content && json.content.sha ? json.content.sha : curSha; // 更新 sha，便于连续保存
     DIRTY.delete(curFile); renderPub();   // 已单独发布，从待发布列表里移除
-    showMsg('ok','🎉 已保存，1~2 分钟后全网生效');
+    showMsg('ok','🎉 已保存（单文件）。页面版本戳未更新，建议用上方「🚀 发布全站」以确保刷新即最新。');
   }catch(e2){
     showMsg('err','🌐 网络请求失败：请检查网络连接后重试。（' + esc(e2 && e2.message ? e2.message : String(e2)) + '）');
   }
@@ -474,6 +474,19 @@ const DIRTY = new Set();      // 有未发布改动的文件名
 const SITE = 'https://' + OWNER + '.github.io';
 let publishing = false;
 let branchName = null;
+
+/* 每个数据文件被哪些页面引用：发布时把页面里的 data/xxx.js 重写成 data/xxx.js?v=内容哈希 */
+const PAGE_REFS = {
+  'growth.js': ['growth.html', 'about.html'],
+  'works.js':  ['works.html', 'about.html'],
+  'ideas.js':  ['ideas.html'],
+  'about.js':  ['about.html']
+};
+/* 幂等：只改 src="data/xxx.js..." 里的版本参数，不碰别处 */
+function stampSrc(html, file, hash){
+  const re = new RegExp('(src="data/' + file.replace(/\./g, '\\.') + ')(\\?[^"]*)?(")', 'g');
+  return html.replace(re, '$1?v=' + hash + '$3');
+}
 
 /* 数据内容指纹：与页面里的印章同算法，用来判断线上是否已经是这一版 */
 function dataStamp(data){
@@ -553,7 +566,27 @@ async function publishAll(){
       tree.push({ path: DIR + '/' + f, mode: '100644', type: 'blob', sha: blob.sha });
     }
 
-    showPub('info','③ 生成一次提交…');
+    /* ③ 把版本戳写进页面：data/xxx.js?v=哈希 —— 让首帧拿到的就是最新数据 */
+    const pageStamps = {};
+    const pageFiles = [];
+    Object.keys(stamps).forEach(f => (PAGE_REFS[f] || []).forEach(p => { if(pageFiles.indexOf(p) < 0) pageFiles.push(p); }));
+    for(const p of pageFiles){
+      showPub('info','③ 更新页面版本戳：<b>' + esc(p) + '</b>');
+      const cur = await ghApi('/repos/' + OWNER + '/' + REPO + '/contents/' + p + '?ref=' + encodeURIComponent(branchName));
+      const html = b64ToUtf8(cur.content);
+      const touched = Object.keys(stamps).filter(f => (PAGE_REFS[f] || []).indexOf(p) >= 0);
+      let out = html;
+      touched.forEach(f => { out = stampSrc(out, f, stamps[f]); });
+      pageStamps[p] = touched.map(f => 'data/' + f + '?v=' + stamps[f]);
+      if(out === html) continue;   // 已经是这一版，不产生多余提交
+      const pageBlob = await ghApi('/repos/' + OWNER + '/' + REPO + '/git/blobs', {
+        method:'POST',
+        body: JSON.stringify({ content: utf8ToB64(out), encoding: 'base64' })
+      });
+      tree.push({ path: p, mode: '100644', type: 'blob', sha: pageBlob.sha });
+    }
+
+    showPub('info','④ 生成一次提交…');
     const newTree = await ghApi('/repos/' + OWNER + '/' + REPO + '/git/trees', {
       method:'POST',
       body: JSON.stringify({ base_tree: headCommit.tree.sha, tree: tree })
@@ -572,8 +605,8 @@ async function publishAll(){
     });
 
     DIRTY.clear(); renderPub();
-    showPub('ok','🎉 已提交 <b>' + esc(commit.sha.slice(0,7)) + '</b>：' + names.length + ' 个文件一次 commit<br>④ 正在等待 GitHub Pages 生效…');
-    await verifyDeploy(stamps);
+    showPub('ok','🎉 已提交 <b>' + esc(commit.sha.slice(0,7)) + '</b>：数据 ' + names.length + ' 个 + 页面 ' + Object.keys(pageStamps).length + ' 个，一次 commit<br>⑤ 正在等待 GitHub Pages 生效…');
+    await verifyDeploy(stamps, pageStamps);
     loadFile();
   }catch(e){
     showPub('err','❌ 发布失败：' + esc(e && e.message ? e.message : String(e)));
@@ -581,10 +614,12 @@ async function publishAll(){
     publishing = false; renderPub();
   }
 }
-/* 轮询线上文件，确认每个文件都已经是刚发布的这一版（带随机参数避开所有缓存） */
-async function verifyDeploy(stamps){
+/* 轮询线上数据文件与页面版本戳，确认都已经是刚发布的这一版（随机参数避开缓存） */
+async function verifyDeploy(stamps, pageStamps){
   const names = Object.keys(stamps);
-  const done = {};
+  const pages = Object.keys(pageStamps || {});
+  const total = names.length + pages.length;
+  const done = {}, donePage = {};
   const deadline = Date.now() + 110000;
   while(Date.now() < deadline){
     for(const f of names){
@@ -597,15 +632,25 @@ async function verifyDeploy(stamps){
         if(dataStamp(data) === stamps[f]) done[f] = true;
       }catch(e){}
     }
-    const n = Object.keys(done).length;
-    if(n === names.length){
-      showPub('ok','✅ 已全网生效（' + n + '/' + names.length + '）。现在刷新页面就能看到最新内容。');
+    for(const p of pages){
+      if(donePage[p]) continue;
+      try{
+        const r = await fetch(SITE + '/' + p + '?t=' + Date.now() + Math.random().toString(36).slice(2), { cache: 'no-store' });
+        if(!r.ok) continue;
+        const html = await r.text();
+        if((pageStamps[p] || []).every(tk => html.indexOf(tk) >= 0)) donePage[p] = true;
+      }catch(e){}
+    }
+    const n = Object.keys(done).length + Object.keys(donePage).length;
+    if(n === total){
+      showPub('ok','✅ 已全网生效（数据 ' + names.length + ' 个 · 页面 ' + pages.length + ' 个）。现在刷新页面就能看到最新内容。');
       return;
     }
-    showPub('info','④ 等待生效 ' + n + '/' + names.length + ' …（GitHub Pages 一般 20~90 秒）');
+    showPub('info','⑤ 等待生效 ' + n + '/' + total + ' …（GitHub Pages 一般 20~90 秒）');
     await new Promise(res => setTimeout(res, 3000));
   }
-  showPub('err','⚠️ 已提交，但仍有文件超过 2 分钟未在线上更新（Pages 构建排队或边缘缓存）。稍后自动生效，刷新即可。');
+  const miss = total - (Object.keys(done).length + Object.keys(donePage).length);
+  showPub('err','⚠️ 已提交，但仍有 ' + miss + ' 项超过 2 分钟未在线上更新（Pages 构建排队或边缘缓存）。稍后自动生效，刷新即可。');
 }
 
 /* ================= 界面切换 ================= */
