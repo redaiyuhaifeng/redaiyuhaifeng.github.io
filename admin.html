@@ -383,8 +383,10 @@ function renderForm(){
 
 /* ================= 校验 ================= */
 function validate(sch, data){
-  const list = sch.shape === 'object' ? [data] : data;
-  if(!Array.isArray(data)) return '数据结构错误：应为' + (sch.shape === 'object' ? '对象' : '数组');
+  const isObj = sch.shape === 'object';
+  const bad = isObj ? (!data || typeof data !== 'object' || Array.isArray(data)) : !Array.isArray(data);
+  if(bad) return '数据结构错误：应为' + (isObj ? '对象' : '数组');
+  const list = isObj ? [data] : data;
   list.forEach((item, i) => {
     if(!item || typeof item !== 'object' || Array.isArray(item)) throw new Error('第 ' + (i+1) + ' 条数据格式错误');
     sch.fields.forEach(f => {
