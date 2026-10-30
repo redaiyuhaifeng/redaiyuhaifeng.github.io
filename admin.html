@@ -113,6 +113,20 @@
   </div>
 
   <div class="files" id="files"></div>
+
+  <!-- ══════ 一键发布：多文件一次 commit，提交后自动等待 Pages 生效 ══════ -->
+  <div class="card2" id="pubCard" style="display:none">
+    <div class="chead">
+      <h3>🚀 一键发布（整站原子提交）</h3>
+      <div class="ops"><button class="op" id="pubRefresh" type="button" title="刷新待发布列表">↺</button></div>
+    </div>
+    <p class="taghint" id="pubList"></p>
+    <div class="toolbar2">
+      <button class="btn2 exp" id="publishBtn" type="button">🚀 发布全站到 GitHub</button>
+    </div>
+    <div class="msg" id="pubMsg"></div>
+  </div>
+
   <div class="msg" id="msg"></div>
 
   <div class="card2" id="formCard" style="display:none">
@@ -122,7 +136,7 @@
       <button class="btn2 ghost" id="reloadBtn">↺ 重新读取</button>
       <button class="chip2 resetbtn" id="logoutBtn">✕ 清除令牌</button>
     </div>
-    <p class="tip">💡 保存 = 直接向仓库推送一次提交；保存成功后 GitHub Pages 需要 1~2 分钟重新构建才会全网生效。</p>
+    <p class="tip">💡 改完多个文件后点上方「🚀 发布全站」= 一次 commit 全站生效，并自动等你看到「已全网生效」；下方「💾 保存到 GitHub」只提交当前这一个文件。</p>
   </div>
 </main>
 
@@ -289,6 +303,7 @@ async function loadFile(){
     curSha = json.sha;
     const text = b64ToUtf8(json.content);
     curData = parseSeed(text, SCHEMA[curFile].varName);
+    DOCS[curFile] = curData;   // 作为基线，不算改动
     $('formCard').style.display = '';
     renderForm();
     showMsg('ok', '✅ 已读取 <b>' + esc(DIR + '/' + curFile) + '</b>（sha: ' + esc(String(curSha).slice(0,7)) + '）');
@@ -376,9 +391,12 @@ function renderForm(){
     add.type = 'button';
     add.className = 'chip2 addbtn';
     add.textContent = '＋ 新增一条';
-    add.onclick = () => { curData.push(emptyItem(sch.fields)); renderForm(); };
+    add.onclick = () => { curData.push(emptyItem(sch.fields)); renderForm(); touch(); };
     box.appendChild(add);
   }
+  /* 任何输入都记入「待发布」 */
+  box.oninput = () => touch();
+  box.onchange = () => touch();
 }
 
 /* ================= 校验 ================= */
@@ -443,10 +461,151 @@ async function save(){
     }
     const json = await res.json();
     curSha = json.content && json.content.sha ? json.content.sha : curSha; // 更新 sha，便于连续保存
+    DIRTY.delete(curFile); renderPub();   // 已单独发布，从待发布列表里移除
     showMsg('ok','🎉 已保存，1~2 分钟后全网生效');
   }catch(e2){
     showMsg('err','🌐 网络请求失败：请检查网络连接后重试。（' + esc(e2 && e2.message ? e2.message : String(e2)) + '）');
   }
+}
+
+/* ================= 一键发布：多文件一次 commit（Git Data API）+ 生效验收 ================= */
+const DOCS = {};              // 文件名 → 当前编辑中的数据
+const DIRTY = new Set();      // 有未发布改动的文件名
+const SITE = 'https://' + OWNER + '.github.io';
+let publishing = false;
+let branchName = null;
+
+/* 数据内容指纹：与页面里的印章同算法，用来判断线上是否已经是这一版 */
+function dataStamp(data){
+  const s = JSON.stringify(data);
+  let h = 5381;
+  for(let i=0;i<s.length;i++) h = ((h<<5)+h+s.charCodeAt(i))>>>0;
+  return s.length.toString(36) + '.' + h.toString(36);
+}
+function showPub(kind, html){
+  const box = $('pubMsg');
+  if(!box) return;
+  box.className = 'msg ' + kind;
+  box.innerHTML = html;
+}
+function touch(){
+  if(!curFile || !curData) return;
+  DOCS[curFile] = curData;
+  DIRTY.add(curFile);
+  renderPub();
+}
+function renderPub(){
+  const card = $('pubCard'), list = $('pubList'), btn = $('publishBtn');
+  if(!card || !list || !btn) return;
+  card.style.display = '';
+  const names = Array.from(DIRTY);
+  list.innerHTML = names.length
+    ? '待发布 <b>' + names.length + '</b> 个文件：' + names.map(f => '<b>' + esc(DIR + '/' + f) + '</b>').join('、') + '（一次提交，原子生效）'
+    : '还没有改动 · 在上方选文件修改后，这里会列出待发布的文件';
+  btn.disabled = !names.length || publishing;
+  btn.textContent = publishing ? '⏳ 发布中…' : '🚀 发布全站到 GitHub';
+}
+async function ghApi(path, opt){
+  const o = opt || {};
+  const headers = {
+    'Authorization': 'Bearer ' + getToken(),
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+  if(o.body) headers['Content-Type'] = 'application/json';
+  const res = await fetch(API + path, { method: o.method || 'GET', headers: headers, body: o.body });
+  if(!res.ok){
+    let detail = '';
+    try{ const j = await res.json(); if(j && j.message) detail = '：' + j.message; }catch(e){}
+    throw new Error('HTTP ' + res.status + detail);
+  }
+  return res.json();
+}
+async function publishAll(){
+  const names = Array.from(DIRTY);
+  if(!names.length){ showPub('err','没有待发布的改动。'); return; }
+  for(const f of names){
+    let bad = null;
+    try{ bad = validate(SCHEMA[f], DOCS[f]); }catch(e){ bad = e.message; }
+    if(bad){ showPub('err','❌ ' + esc(f) + ' 校验未通过：' + esc(bad)); return; }
+  }
+  publishing = true; renderPub();
+  try{
+    showPub('info','① 读取仓库信息…');
+    if(!branchName){
+      const repo = await ghApi('/repos/' + OWNER + '/' + REPO);
+      branchName = repo.default_branch || 'main';
+    }
+    const ref = await ghApi('/repos/' + OWNER + '/' + REPO + '/git/ref/heads/' + branchName);
+    const headSha = ref.object.sha;
+    const headCommit = await ghApi('/repos/' + OWNER + '/' + REPO + '/git/commits/' + headSha);
+
+    const tree = [], stamps = {};
+    for(let i=0;i<names.length;i++){
+      const f = names[i];
+      const text = buildSeed(DOCS[f], SCHEMA[f].varName);
+      stamps[f] = dataStamp(DOCS[f]);
+      showPub('info','② 上传文件 ' + (i+1) + '/' + names.length + '：<b>' + esc(DIR + '/' + f) + '</b>');
+      const blob = await ghApi('/repos/' + OWNER + '/' + REPO + '/git/blobs', {
+        method:'POST',
+        body: JSON.stringify({ content: utf8ToB64(text), encoding: 'base64' })
+      });
+      tree.push({ path: DIR + '/' + f, mode: '100644', type: 'blob', sha: blob.sha });
+    }
+
+    showPub('info','③ 生成一次提交…');
+    const newTree = await ghApi('/repos/' + OWNER + '/' + REPO + '/git/trees', {
+      method:'POST',
+      body: JSON.stringify({ base_tree: headCommit.tree.sha, tree: tree })
+    });
+    const commit = await ghApi('/repos/' + OWNER + '/' + REPO + '/git/commits', {
+      method:'POST',
+      body: JSON.stringify({
+        message: 'chore(data): 一键发布 ' + names.join('、'),
+        tree: newTree.sha,
+        parents: [headSha]
+      })
+    });
+    await ghApi('/repos/' + OWNER + '/' + REPO + '/git/refs/heads/' + branchName, {
+      method:'PATCH',
+      body: JSON.stringify({ sha: commit.sha, force: false })
+    });
+
+    DIRTY.clear(); renderPub();
+    showPub('ok','🎉 已提交 <b>' + esc(commit.sha.slice(0,7)) + '</b>：' + names.length + ' 个文件一次 commit<br>④ 正在等待 GitHub Pages 生效…');
+    await verifyDeploy(stamps);
+    loadFile();
+  }catch(e){
+    showPub('err','❌ 发布失败：' + esc(e && e.message ? e.message : String(e)));
+  }finally{
+    publishing = false; renderPub();
+  }
+}
+/* 轮询线上文件，确认每个文件都已经是刚发布的这一版（带随机参数避开所有缓存） */
+async function verifyDeploy(stamps){
+  const names = Object.keys(stamps);
+  const done = {};
+  const deadline = Date.now() + 110000;
+  while(Date.now() < deadline){
+    for(const f of names){
+      if(done[f]) continue;
+      try{
+        const url = SITE + '/' + DIR + '/' + f + '?v=' + Date.now() + Math.random().toString(36).slice(2);
+        const r = await fetch(url, { cache: 'no-store' });
+        if(!r.ok) continue;
+        const data = parseSeed(await r.text(), SCHEMA[f].varName);
+        if(dataStamp(data) === stamps[f]) done[f] = true;
+      }catch(e){}
+    }
+    const n = Object.keys(done).length;
+    if(n === names.length){
+      showPub('ok','✅ 已全网生效（' + n + '/' + names.length + '）。现在刷新页面就能看到最新内容。');
+      return;
+    }
+    showPub('info','④ 等待生效 ' + n + '/' + names.length + ' …（GitHub Pages 一般 20~90 秒）');
+    await new Promise(res => setTimeout(res, 3000));
+  }
+  showPub('err','⚠️ 已提交，但仍有文件超过 2 分钟未在线上更新（Pages 构建排队或边缘缓存）。稍后自动生效，刷新即可。');
 }
 
 /* ================= 界面切换 ================= */
@@ -455,6 +614,7 @@ function enterConsole(){
   $('console').style.display = '';
   curFile = 'about.js';
   renderFiles();
+  renderPub();
   loadFile();
 }
 function logout(){
@@ -476,6 +636,8 @@ $('tokenInput').addEventListener('keydown', e => { if(e.key === 'Enter') $('star
 $('saveBtn').onclick = save;
 $('reloadBtn').onclick = loadFile;
 $('logoutBtn').onclick = logout;
+$('publishBtn').onclick = publishAll;
+$('pubRefresh').onclick = renderPub;
 
 // 表单内条目操作（上移 / 下移 / 删除）
 $('form').addEventListener('click', e => {
@@ -487,6 +649,7 @@ $('form').addEventListener('click', e => {
   else if(act === 'down' && i < curData.length-1){ const t = curData[i]; curData[i] = curData[i+1]; curData[i+1] = t; }
   else if(act === 'del'){ if(!confirm('确定删除第 ' + (i+1) + ' 条？')) return; curData.splice(i,1); }
   renderForm();
+  touch();
 });
 
 /* ================= 如果已有令牌（同标签页刷新）直接进入 ================= */
