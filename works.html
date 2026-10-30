@@ -194,7 +194,7 @@ footer a{color:var(--link-on-dark)}
      ▸ cat 类型：网站 / 设计 / 写作 / 视频 / 其他（决定卡片光晕颜色与图标）
      ▸ link 留空则显示「链接待补充」；tags 用逗号分隔；date 是日期小签
      ▸ 想让新作品对外公开：写进 data/works.js → 部署后上传 → 全网可见
-     ▸ 文件内容更新后，在页面上点「↺ 恢复文件初始内容」载入新版
+     ▸ 文件内容更新后，刷新页面会自动同步新版（本机独有、文件里没有的作品会保留）
      ══════════════════════════════════════════════════════════ -->
 <script src="data/works.js"></script>
 <!-- ══════════════ 种子数据结束，以下内容不用动 ══════════════ -->
@@ -227,7 +227,7 @@ footer a{color:var(--link-on-dark)}
 
   <div class="masonry" id="wall"></div>
   <div class="empty" id="empty" style="display:none">🌌 这里还空着——点「＋ 展出一件作品」放进第一颗星吧</div>
-  <p class="tip">💡 页面编辑保存在当前浏览器，下次打开仍在 · 「↺ 恢复文件初始内容」= 丢弃本机编辑、重新读取文件里的种子数据<br>📱 想让新作品对外公开：写进文件顶部种子数据 → 部署后上传 → 全网可见 · 数据整体迁移用「学习舱 → 数据备份」</p>
+  <p class="tip">💡 页面编辑保存在当前浏览器，下次打开仍在 · 文件（data/works.js）更新后刷新自动同步新内容，本机独有的作品会保留 · 「↺ 恢复文件初始内容」= 丢弃本机全部编辑、重新读取文件里的种子数据<br>📱 想让新作品对外公开：写进文件顶部种子数据 → 部署后上传 → 全网可见 · 数据整体迁移用「学习舱 → 数据备份」</p>
 </main>
 
 <div class="modal" id="editModal">
@@ -259,15 +259,55 @@ footer a{color:var(--link-on-dark)}
 <footer>✦ 热带屿 · <a href="index.html">返回首页</a></footer>
 
 <script>
-/* ================= 数据层：页面编辑 + 浏览器保存 ================= */
+/* ================= 数据层：文件为基座 + 本机编辑增量 =================
+   data/works.js 每次改动都会产生新的「文件指纹」：
+   ▸ 指纹相同 → 本机快照基于当前文件，保留本机编辑（刷新不变，无闪动）
+   ▸ 指纹不同 / 老版本快照 → 以文件内容为准，仅把本机独有的作品追加回来
+   整个过程在首次渲染前同步完成，不额外联网、不重载页面。 */
 const STORE_KEY='isle_works_v1';
-let WORKS=(function(){
+const SEAL_KEY=STORE_KEY+'_seal';
+function sealOf(data){
+  const s=JSON.stringify(data);
+  let h=5381;
+  for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0;
+  return s.length.toString(36)+'.'+h.toString(36);
+}
+const FILE_SEAL=sealOf(typeof WORKS_SEED!=='undefined'?WORKS_SEED:[]);
+const workKey=w=>String(w&&(w.title||w.desc)||'').trim();
+function readLocal(){
   try{const v=JSON.parse(localStorage.getItem(STORE_KEY));if(Array.isArray(v))return v;}catch(e){}
+  return null;
+}
+function readSeal(){try{return localStorage.getItem(SEAL_KEY)||'';}catch(e){return '';}}
+function writeLocal(list,seal){
+  try{localStorage.setItem(STORE_KEY,JSON.stringify(list));localStorage.setItem(SEAL_KEY,seal);}catch(e){}
+}
+/* 标题（缺省用描述）视为同一件作品，文件优先，避免文件更新后出现重复卡片 */
+function mergeWithFile(seed,local){
+  const out=seed.map(w=>Object.assign({},w));
+  const seen=Object.create(null);
+  out.forEach(w=>{seen[workKey(w)]=1;});
+  local.forEach(w=>{
+    if(!w||typeof w!=='object'||!workKey(w))return;
+    const k=workKey(w);
+    if(seen[k])return;
+    seen[k]=1;
+    out.push(Object.assign({title:'',cat:'其他',desc:'',link:'',tags:[],date:''},w));
+  });
+  return out;
+}
+let fileSynced=false;
+let WORKS=(function(){
   const seed=JSON.parse(JSON.stringify(WORKS_SEED));
-  try{localStorage.setItem(STORE_KEY,JSON.stringify(seed));}catch(e){}
-  return seed;
+  const local=readLocal();
+  if(!local){writeLocal(seed,FILE_SEAL);return seed;}
+  if(readSeal()===FILE_SEAL)return local;
+  fileSynced=true;
+  const merged=mergeWithFile(seed,local);
+  writeLocal(merged,FILE_SEAL);
+  return merged;
 })();
-function persist(){try{localStorage.setItem(STORE_KEY,JSON.stringify(WORKS));}catch(e){}}
+function persist(){writeLocal(WORKS,FILE_SEAL);}
 
 const CATS={'网站':'🌐','设计':'🎨','写作':'✍️','视频':'🎬','其他':'✨'};
 let tag='全部', kw='';
@@ -287,7 +327,7 @@ function render(){
   document.querySelectorAll('.chip2[data-t]').forEach(b=>b.onclick=()=>{tag=b.dataset.t;render();});
   $('resetBtn').onclick=()=>{
     if(confirm('将丢弃本页在浏览器中的全部编辑，恢复为文件里写死的初始内容（种子数据）。\n\n若本机编辑里有想保留的作品，请先导出备份！\n\n确定恢复吗？')){
-      try{localStorage.removeItem(STORE_KEY);}catch(e){}
+      try{localStorage.removeItem(STORE_KEY);localStorage.removeItem(SEAL_KEY);}catch(e){}
       location.reload();
     }
   };
@@ -385,6 +425,7 @@ s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
 s.style.setProperty('--d',(Math.random()*4+2)+'s');s.style.animationDelay=Math.random()*5+'s';
 sp.appendChild(s);}
 render();
+if(fileSynced)setTimeout(()=>toast('🔄 已同步文件里的最新内容'),400);
 </script>
 <script>
 /* ===== 3D 翻转卡片：无 hover 设备点按翻面（只加交互，不碰数据渲染） ===== */
