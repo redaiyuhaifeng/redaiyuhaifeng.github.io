@@ -205,6 +205,28 @@ const SCHEMA = {
       { key: 'title', label: '标题 *', type: 'text', required: true },
       { key: 'desc',  label: '描述',  type: 'textarea' }
     ]
+  },
+  'team.js': {
+    varName: 'TEAM_SEED',
+    shape: 'object',
+    label: '团队项目 · 项目档案',
+    itemName: '项目',
+    fields: [
+      { key: 'projectName',  label: '项目名称 *', type: 'text', required: true },
+      { key: 'tagline',      label: '一句话定位', type: 'text' },
+      { key: 'version',      label: '项目版本', type: 'text' },
+      { key: 'audience',     label: '面向对象', type: 'text' },
+      { key: 'summary',      label: '项目概述', type: 'textarea' },
+      { key: 'mainline',     label: '核心链路（每行一步）', type: 'lines' },
+      { key: 'features',     label: '功能模块（每行一条，格式：名称｜说明）', type: 'lines' },
+      { key: 'customer',     label: '顾客端说明', type: 'textarea' },
+      { key: 'members',      label: '团队成员（每行一条，格式：姓名｜角色 / 分工 · 文件未提供则留空）', type: 'lines' },
+      { key: 'progress',     label: '项目进程（每行一条，格式：模块｜说明 · 不写日期）', type: 'lines' },
+      { key: 'progressNote', label: '进程补充说明', type: 'textarea' },
+      { key: 'notes',        label: '项目说明（每行一条，格式：标题｜说明）', type: 'lines' },
+      { key: 'takeaways',    label: '心得体会（每行一条，格式：标题｜内容 · 文件未提供则留空）', type: 'lines' },
+      { key: 'source',       label: '内容来源', type: 'textarea' }
+    ]
   }
 };
 
@@ -480,7 +502,8 @@ const PAGE_REFS = {
   'growth.js': ['growth.html', 'about.html'],
   'works.js':  ['works.html', 'about.html'],
   'ideas.js':  ['ideas.html'],
-  'about.js':  ['about.html']
+  'about.js':  ['about.html'],
+  'team.js':   ['team.html']
 };
 /* 幂等：只改 src="data/xxx.js..." 里的版本参数，不碰别处 */
 function stampSrc(html, file, hash){
